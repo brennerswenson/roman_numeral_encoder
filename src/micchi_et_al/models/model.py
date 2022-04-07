@@ -6,12 +6,11 @@ import time
 import numpy as np
 import tensorflow as tf
 from tensorflow.python.keras import Input, Model
-from tensorflow.python.keras.backend import name_scope
 from tensorflow.python.keras.callbacks import Callback
 from tensorflow.python.keras.layers import Conv1D, Concatenate, MaxPooling1D, TimeDistributed, Dense, Lambda, \
     BatchNormalization, Masking, GRU, Bidirectional, Activation
 
-from config import INPUT_TYPE2INPUT_SHAPE, KEYS_SPELLING
+from src.shared_config import INPUT_TYPE2INPUT_SHAPE
 
 
 class TimeOut(Callback):
