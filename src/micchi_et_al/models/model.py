@@ -38,20 +38,20 @@ def DenseNetLayer(x, b, f, n=1):
     :return:
     """
     with tf.name_scope(f"denseNet_{n}"):
-        for _ in range(b):
+        for _ in range(b):  # create b*2 (elementary blocks) amount of convolutional layers
             y = BatchNormalization()(x)
-            y = Conv1D(filters=4 * f, kernel_size=1, padding='same', data_format='channels_last')(y)
+            y = Conv1D(filters=4 * f, kernel_size=1, padding='same', data_format='channels_last')(y)  # bottleneck layer
             y = Activation('relu')(y)
             y = BatchNormalization()(y)
-            y = Conv1D(filters=f, kernel_size=8, padding='same', data_format='channels_last')(y)
+            y = Conv1D(filters=f, kernel_size=8, padding='same', data_format='channels_last')(y)  # keeps same number of filters but increases the kernel size
             y = Activation('relu')(y)
-            x = Concatenate()([x, y])
+            x = Concatenate()([x, y])  # concat the original input with the output, and rename that output to be the new input
     return x
 
 
 def PoolingLayer(x, k, s, n=1):
     """
-    Implementation of a DenseNetLayer
+    Implementation of a DenseNetLayer. Create one pooling layer with an additional convolution?
     :param x: input
     :param k: feature maps before batch_norm
     :param s: stride for the Pooling Layer
@@ -60,7 +60,7 @@ def PoolingLayer(x, k, s, n=1):
     """
     with tf.name_scope(f"poolingLayer_{n}"):
         y = BatchNormalization()(x)
-        y = Conv1D(filters=k, kernel_size=1, padding='same', data_format='channels_last')(y)
+        y = Conv1D(filters=k, kernel_size=1, padding='same', data_format='channels_last')(y)  # bottleneck layer
         y = Activation('relu')(y)
         y = BatchNormalization()(y)
         y = MaxPooling1D(s, s, padding='same', data_format='channels_last')(y)
@@ -171,8 +171,8 @@ def create_model(name, model_type, input_type, derive_root=False):
     _2 = Input(shape=(None,), name="_2")
     _3 = Input(shape=(None,), name="_3")
 
-    if 'conv' in model_type:
-        x = DenseNetLayer(notes, b=4, f=8, n=1)
+    if 'conv' in model_type:  # only two densenet sections
+        x = DenseNetLayer(notes, b=4, f=8, n=1)  # b=num blocks, f=feature maps n=unique id for densenetlayer
         x = PoolingLayer(x, 32, 2, n=1)
         x = DenseNetLayer(x, b=4, f=5, n=2)
         x = PoolingLayer(x, 48, 2, n=2)
@@ -199,7 +199,7 @@ def create_model(name, model_type, input_type, derive_root=False):
         y_pro = ProgressionMultiTaskLayer(x, input_type)
         y = y_pro + y_loc
     else:
-        y = MultiTaskLayer(x, derive_root, input_type)
+        y = MultiTaskLayer(x, derive_root, input_type)  # this is the output layer
 
     model = Model(inputs=[notes, mask, _1, _2, _3], outputs=y, name=name)
     return model
