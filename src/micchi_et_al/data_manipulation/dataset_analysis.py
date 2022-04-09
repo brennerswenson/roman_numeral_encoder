@@ -11,9 +11,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 import seaborn as sns
 
-from config import FPQ, DATA_FOLDER, PITCH_FIFTHS
-from utils_music import load_score_pitch_complete, calculate_number_transpositions_key, load_score_spelling_bass, \
-    load_chord_labels
+from src.shared_config import FPQ, DATA_FOLDER, PITCH_FIFTHS
+from src.micchi_et_al.utils.utils_music import load_score_pitch_complete, calculate_number_transpositions_key, load_score_spelling_bass, load_chord_labels
 
 
 def find_pitch_extremes():

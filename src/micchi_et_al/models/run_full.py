@@ -12,9 +12,9 @@ from argparse import ArgumentParser
 import numpy as np
 from tensorflow.python.keras.models import load_model
 
-from converters import ConverterTab2Rn, ConverterTab2Dez
-from utils import find_input_type, write_tabular_annotations
-from utils_music import prepare_input_from_xml
+from src.micchi_et_al.utils.converters import ConverterTab2Rn, ConverterTab2Dez
+from src.micchi_et_al.utils.utils import find_input_type, write_tabular_annotations
+from src.micchi_et_al.utils.utils_music import prepare_input_from_xml
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -56,7 +56,7 @@ def get_args():
     input_valid = False
     model = None
     while not input_valid:
-        models = [m for m in os.listdir('models') if m + '.h5' in os.listdir(os.path.join('models', m))]
+        models = [m for m in os.listdir('../../trained_models') if m + '.h5' in os.listdir(os.path.join('../../trained_models', m))]
         model_choice = [str(n) + '. ' + m for n, m in enumerate(models)]
         print(f"Please choose the model you want to apply:")
         for c in model_choice:

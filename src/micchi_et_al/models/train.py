@@ -10,10 +10,10 @@ import seaborn as sns
 from matplotlib import pyplot as plt
 from tensorflow.python.keras.callbacks import EarlyStopping, TensorBoard, ModelCheckpoint
 
-from config import INPUT_TYPES, DATA_FOLDER
-from load_data import load_tfrecords_dataset
-from model import create_model, TimeOut
-from utils import setup_tfrecords_paths
+from src.shared_config import INPUT_TYPES, DATA_FOLDER
+from src.micchi_et_al.data_manipulation.load_data import load_tfrecords_dataset
+from src.micchi_et_al.models.model import create_model, TimeOut
+from src.micchi_et_al.utils.utils import setup_tfrecords_paths
 
 
 def visualize_data(data):
@@ -28,17 +28,17 @@ def visualize_data(data):
 
 
 def setup_model_paths(exploratory, model_type, input_type):
-    os.makedirs('models', exist_ok=True)
+    os.makedirs('../../trained_models', exist_ok=True)
     if exploratory:
         name = 'temp'
     else:
         i = 0
         name = '_'.join([model_type, input_type, str(i)])
-        while name in os.listdir('models'):
+        while name in os.listdir('../../trained_models'):
             i += 1
             name = '_'.join([model_type, input_type, str(i)])  # incrementally create new model files
 
-    folder = os.path.join('models', name)
+    folder = os.path.join('../../trained_models', name)
     os.makedirs(folder, exist_ok=True if exploratory else False)
 
     return folder, name
@@ -49,6 +49,7 @@ exploratory = False
 # exploratory = True
 models = ['conv_gru', 'conv_dil', 'gru', 'conv_gru_local', 'conv_dil_local']
 
+chunk_size = 160
 batch_size = 16
 shuffle_buffer = 100_000
 epochs = 100
@@ -61,10 +62,10 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     model_type, input_type = models[args.model_idx], INPUT_TYPES[args.input_idx]
-
-    train_path, valid_path = setup_tfrecords_paths(DATA_FOLDER, ['train', 'valid'], input_type)
-    train_data = load_tfrecords_dataset(train_path, batch_size, shuffle_buffer, input_type, repeat=False)
-    valid_data = load_tfrecords_dataset(valid_path, batch_size, 1, input_type, repeat=False)
+    tfrecords_dir = os.path.join(DATA_FOLDER, f'{chunk_size}_chunk')
+    train_path, valid_path = setup_tfrecords_paths(tfrecords_dir, ['train', 'valid'], input_type)
+    train_data = load_tfrecords_dataset(train_path, batch_size, shuffle_buffer, input_type, chunk_size=160, repeat=False)
+    valid_data = load_tfrecords_dataset(valid_path, batch_size, 1, input_type, chunk_size=160, repeat=False)
     n_train = sum([1 for _ in train_data.unbatch()])  # it takes a few seconds, but it's OK...
     n_valid = sum([1 for _ in valid_data.unbatch()])
 

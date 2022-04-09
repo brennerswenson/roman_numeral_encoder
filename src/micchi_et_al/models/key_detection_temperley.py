@@ -9,8 +9,8 @@ import numpy as np
 import seaborn as sns
 import matplotlib.pyplot as plt
 
-from config import FPQ, HSIZE, DATA_FOLDER, KEYS_PITCH
-from utils_music import load_score_pitch_class, load_chord_labels, attach_chord_root, encode_chords, \
+from src.shared_config import FPQ, HSIZE, DATA_FOLDER, KEYS_PITCH
+from src.micchi_et_al.utils.utils_music import load_score_pitch_class, load_chord_labels, attach_chord_root, encode_chords, \
     segment_chord_labels
 
 

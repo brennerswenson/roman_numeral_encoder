@@ -8,7 +8,7 @@ from shutil import copyfile
 
 import numpy as np
 
-from config import DATA_FOLDER
+from src.shared_config import DATA_FOLDER
 
 
 # TODO: Implement test set everywhere

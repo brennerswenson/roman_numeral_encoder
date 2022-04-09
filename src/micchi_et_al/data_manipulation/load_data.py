@@ -4,7 +4,7 @@ Utils for loading the tfrecords data.
 
 import tensorflow as tf
 
-from config import CHUNK_SIZE, INPUT_TYPE2INPUT_SHAPE
+from src.shared_config import INPUT_TYPE2INPUT_SHAPE
 
 
 def _parse_function(proto, n, classes_key, classes_degree, classes_quality, classes_inversion, classes_root):

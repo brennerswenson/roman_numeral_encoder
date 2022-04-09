@@ -23,9 +23,9 @@ from argparse import ArgumentParser
 import numpy as np
 import tensorflow as tf
 
-from config import DATA_FOLDER, FPQ, HSIZE, CHUNK_SIZE, INPUT_TYPES
-from utils import setup_tfrecords_paths
-from utils_music import load_score_pitch_complete, load_chord_labels, transpose_chord_labels, segment_chord_labels, \
+from src.shared_config import DATA_FOLDER, FPQ, HSIZE, CHUNK_SIZE, INPUT_TYPES
+from src.micchi_et_al.utils.utils import setup_tfrecords_paths
+from src.micchi_et_al.utils.utils_music import load_score_pitch_complete, load_chord_labels, transpose_chord_labels, segment_chord_labels, \
     encode_chords, load_score_pitch_bass, load_score_spelling_bass, calculate_number_transpositions_key, \
     attach_chord_root, load_score_pitch_class, load_score_spelling_complete, load_score_spelling_class
 

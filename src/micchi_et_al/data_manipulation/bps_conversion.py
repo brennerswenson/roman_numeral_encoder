@@ -7,7 +7,7 @@ import os
 
 import xlrd
 
-from config import DATA_FOLDER
+from src.shared_config import DATA_FOLDER
 
 
 def transform_bps_chords_file_to_csv(chords_file, output_file):

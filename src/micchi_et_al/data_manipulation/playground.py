@@ -5,13 +5,12 @@ Just fool around trying to answer some quick questions about the data.
 import logging
 import os
 
-import numpy as np
 import seaborn as sns
 import matplotlib.pyplot as plt
 
-from config import DATA_FOLDER, HSIZE, FPQ, PITCH_FIFTHS
-from utils_music import _load_score, load_chord_labels, attach_chord_root, segment_chord_labels, transpose_chord_labels, \
-    encode_chords, load_score_pitch_complete, load_score_spelling_bass
+from src.shared_config import DATA_FOLDER, HSIZE, FPQ
+from src.micchi_et_al.utils.utils_music import load_chord_labels, attach_chord_root, segment_chord_labels, transpose_chord_labels, \
+    encode_chords, load_score_pitch_complete
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
