@@ -10,6 +10,7 @@ from config import NOTES, QUALITY, KEYS_SPELLING, INPUT_TYPES
 
 
 def setup_tfrecords_paths(tfrecords_folder, tfrecords_basename, mode):
+    """Create filenames for train and valid (or test) tfrecords."""
     return [os.path.join(tfrecords_folder, f'{bn}_{mode}.tfrecords') for bn in tfrecords_basename]
 
 
