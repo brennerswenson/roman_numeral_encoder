@@ -91,7 +91,7 @@ def plot_results(y_true, y_pred, name, start, mode='probabilities', pitch_spelli
     for j in range(7):
         # if j > 0:  # temporary analysis tool, remove if not needed
         #     continue
-        if j == 0:
+        if j == 0:  # KEY
             if pitch_spelling:
                 ordering = [i + j for i in range(15) for j in [0, 15]]
                 # ordering = [i + j for i in range(26) for j in [0, 29]]
@@ -203,7 +203,8 @@ def generate_results(data_folder, model_folder, model_name, dataset='valid', ver
     test_data = load_tfrecords_dataset(data_file, batch_size=16, shuffle_buffer=1, input_type=input_type, repeat=False)
 
     clear_session()  # Very important to avoid memory problems
-    model = load_model(os.path.join(model_folder, model_name + '.h5'))
+    if model is None:  # load model if model object isn't passed, load from serialized custom objects
+        model = load_model(os.path.join(model_folder, model_name + '.h5'), custom_objects={'Encoder': Encoder, 'MultiHeadedAttention': MultiHeadAttention, 'EncoderLayer': EncoderLayer}, compile=False)
     if verbose:
         model.summary()
         print(model_name)
@@ -213,16 +214,16 @@ def generate_results(data_folder, model_folder, model_name, dataset='valid', ver
     n_data = 0
     for data_point in test_data.unbatch().as_numpy_iterator():
         n_data += 1
-        (x, m, fn, tr, s), y = data_point
-        timesteps.append(np.sum(y[0], dtype=int))  # every label has a single 1 per timestep
+        (x, m, fn, tr, s), y = data_point  # (piano_roll, mask, file_name, transposition, start), (y_key, y_dg1, y_dg2, y_qlt, y_inv, y_roo)
+        timesteps.append(np.sum(y[0], dtype=int))  # every label has a single 1 per timestep, num timestamps
         file_names.append(fn[0].decode('utf-8'))
-        piano_rolls.append(x[:4 * timesteps[-1]])
+        piano_rolls.append(x[:4 * timesteps[-1]])  # get piano roll section that lines up with truth data
         start_frames.append(s[0])
-        ys_true.append([label[:timesteps[-1], :] for label in y])
+        ys_true.append([label[:timesteps[-1], :] for label in y])  # add the (y_key, y_dg1, y_dg2, y_qlt, y_inv, y_roo) for each time step. pretty sure this is 8th note resolution?
 
     # Predict new labels, same structure as ys_true
-    temp = model.predict(test_data, verbose=True)
-    ys_pred = [[d[e, :timesteps[e]] for d in temp] for e in range(n_data)]
+    temp = model.predict(test_data, verbose=True, )  # list of predictions for each y component
+    ys_pred = [[d[e, :timesteps[e]] for d in temp] for e in range(n_data)]  # get individual frame predictions? 140 excerpts
 
     del model
     info = {
@@ -245,6 +246,7 @@ def analyse_results(ys_true, ys_pred, verbose=True):
     """
     # clear_session()  # Very important to avoid memory problems
 
+    # key, degree, degree, quality, inversion, root
     roman_tp = 0
     roman_inv_tp = 0
     root_tp = 0
@@ -259,17 +261,17 @@ def analyse_results(ys_true, ys_pred, verbose=True):
         y_true, y_pred = ys_true[step], ys_pred[step]  # shape: [outputs], (timestep, output features)
         correct = np.array([_check_predictions(y_true, y_pred, j) for j in range(6)])  # shape: (output, timestep)
         true_positives += np.sum(correct, axis=-1)  # true positives per every output
-        roman_tp += np.sum(np.prod(correct[:4], axis=0), axis=-1)
-        roman_inv_tp += np.sum(np.prod(correct[:5], axis=0), axis=-1)
-        degree_tp += np.sum(np.prod(correct[1:3], axis=0), axis=-1)
+        roman_tp += np.sum(np.prod(correct[:4], axis=0), axis=-1)  # roman tp, without root or inversions
+        roman_inv_tp += np.sum(np.prod(correct[:5], axis=0), axis=-1)  # roman tp, with inversions but w/out root
+        degree_tp += np.sum(np.prod(correct[1:3], axis=0), axis=-1)  # how many time steps where both degrees were correct
         secondary_msk = (np.argmax(y_true[1], axis=-1) != 0)  # only chords on secondary degrees
-        secondary_total += sum(secondary_msk)
-        secondary_tp += np.sum(np.prod(correct[1:3], axis=0)[secondary_msk], axis=-1)
+        secondary_total += sum(secondary_msk)  # how many secondary dominants
+        secondary_tp += np.sum(np.prod(correct[1:3], axis=0)[secondary_msk], axis=-1)  # of secondary chords, how many were correct
         root_der = find_root_full_output(y_pred, pitch_spelling=ps)
         root_coherence += np.sum(
-            root_der == np.argmax(y_pred[5], axis=-1))  # if predicted and derived root are the same
+            root_der == np.argmax(y_pred[5], axis=-1))  # if predicted and derived root are the same (derived from the predicted roman numerals)
         root_tp += np.sum(root_der == np.argmax(y_true[5], axis=-1))
-        d7_msk = (np.argmax(y_true[3], axis=-1) == Q2I['d7'])
+        d7_msk = (np.argmax(y_true[3], axis=-1) == Q2I['d7'])  # diminished 7th? why do we care about this?
         d7_total += sum(d7_msk)
         d7_tp += np.sum(np.prod(correct[:4], axis=0)[d7_msk], axis=-1)
         d7_corr += np.sum(correct[3][d7_msk], axis=-1)
@@ -447,13 +449,20 @@ if __name__ == '__main__':
     dataset = 'valid'
     models_folder = os.path.join('runs', 'run_08', 'models')
 
-    # model_name = ''
-    # mf = os.path.join(models_folder, model_name)
-    # ys_true, ys_pred, info = generate_results(DATA_FOLDER, mf, model_name)
-    # write_tabular_annotations(ys_pred, info["timesteps"], info["file_names"], os.path.join(mf, 'analyses'))
-    # acc = analyse_results(ys_true, ys_pred)
-    model_with_accuracies = compare_results(DATA_FOLDER, models_folder, dataset, export_annotations=True)
-    comparison_fp = os.path.join(models_folder, '..', f'comparison_{datetime.now().strftime("%Y-%m-%d_%H-%M")}.csv')
+    CONFUSION_MATRICES = True  # if confusion matrices are generated
+    DATASET = 'valid'
+    MODELS_FOLDER = os.path.join('../../trained_models')
+    CHUNK_SIZE = 160
+    MODEL_NAME = 'encoder_spelling_bass_cut_44'
+
+    model_file_path = os.path.join(MODELS_FOLDER, MODEL_NAME)
+    ys_true, ys_pred, info = generate_results(DATA_FOLDER, model_file_path, MODEL_NAME, chunk_size=CHUNK_SIZE)
+    write_tabular_annotations(ys_pred, info["timesteps"], info["file_names"], os.path.join(model_file_path, 'analyses'))
+    idx = 139
+    # plot_results(ys_true[idx], ys_pred[idx], name=info['file_names'][idx], start=0, mode='predictions')
+    acc = analyse_results(ys_true, ys_pred, confusion_matrices=CONFUSION_MATRICES)
+    model_with_accuracies = compare_results(DATA_FOLDER, MODELS_FOLDER, DATASET, export_annotations=True)
+    comparison_fp = os.path.join(MODELS_FOLDER, '../../..', f'comparison_{datetime.now().strftime("%Y-%m-%d_%H-%M")}.csv')
     _write_comparison_file(model_with_accuracies, comparison_fp)
     _average_results(comparison_fp, comparison_fp.replace("comparison", "average"))
     _t_test_results(comparison_fp)
