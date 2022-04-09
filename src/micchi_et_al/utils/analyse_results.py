@@ -250,10 +250,47 @@ def analyse_results(ys_true, ys_pred, verbose=True):
     total_predictions = np.sum([_[0].shape[0] for _ in ys_true])
     n_data = len(ys_true)
     true_positives = np.zeros(6)  # true positives for each separate feature
-    ps = (ys_true[0][-1].shape[1] == 35)  # TODO: Dodgy and risky. Maybe find a cleaner way
-    for step in range(n_data):
+    ps = (ys_true[0][-1].shape[1] == 35)
+
+    task_pred_dicts = {
+        "key": {
+            "predictions": list(),
+            "actual": list(),
+        },
+        "degree 1": {
+            "predictions": list(),
+            "actual": list(),
+        },
+        "degree 2": {
+            "predictions": list(),
+            "actual": list(),
+        },
+        "quality": {
+            "predictions": list(),
+            "actual": list(),
+        },
+        "inversion": {
+            "predictions": list(),
+            "actual": list(),
+        },
+        "root": {
+            "predictions": list(),
+            "actual": list(),
+        },
+    }
+
+    for step in range(n_data):  # every sequence (which is made up of 32nd notes)
         y_true, y_pred = ys_true[step], ys_pred[step]  # shape: [outputs], (timestep, output features)
-        correct = np.array([_check_predictions(y_true, y_pred, j) for j in range(6)])  # shape: (output, timestep)
+        correct = np.array([_check_predictions(y_true, y_pred, j) for j in range(6)])  # shape: (output, timestep). gets correct/not correct for each label type
+
+        pred_label_dicts = get_pred_labels(y_true, y_pred)
+
+        for task in pred_label_dicts.keys():
+            task_preds = pred_label_dicts[task]['predictions']
+            task_actual = pred_label_dicts[task]['actual']
+            task_pred_dicts[task]['predictions'].extend(task_preds.tolist())
+            task_pred_dicts[task]['actual'].extend(task_actual.tolist())
+
         true_positives += np.sum(correct, axis=-1)  # true positives per every output
         roman_tp += np.sum(np.prod(correct[:4], axis=0), axis=-1)  # roman tp, without root or inversions
         roman_inv_tp += np.sum(np.prod(correct[:5], axis=0), axis=-1)  # roman tp, with inversions but w/out root
@@ -269,6 +306,11 @@ def analyse_results(ys_true, ys_pred, verbose=True):
         d7_total += sum(d7_msk)
         d7_tp += np.sum(np.prod(correct[:4], axis=0)[d7_msk], axis=-1)
         d7_corr += np.sum(correct[3][d7_msk], axis=-1)
+
+    # optionally generate confusion matrices
+    plot_confusion_matrices(task_pred_dicts) if confusion_matrices else None
+
+    f1_rec_prec_dict = get_f1_prec_rec(task_pred_dicts)  # get f1, precision, recall for tasks
 
     acc = 100 * true_positives / total_predictions
     derived_features = ['degree', 'secondary', 'derived root', 'roman', 'roman + inv', 'root coherence', 'd7 no inv']
@@ -287,6 +329,10 @@ def analyse_results(ys_true, ys_pred, verbose=True):
         print(f"accuracy for the different items:")
         for k, v in accuracies.items():
             print(f'{k:15}: {v:2.2f} %')
+
+        for k, v in f1_rec_prec_dict.items():
+            for metric, value in v.items():
+                print(f'{k:15}: {metric}: {value:2.4f}')
 
     return accuracies
 
