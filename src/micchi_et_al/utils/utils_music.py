@@ -55,6 +55,7 @@ class HarmonicAnalysisError(Exception):
 def _load_score(score_file, fpq):
     if 'bps' in score_file:
         try:
+            # if there are repeats in the piece, expand them
             score = music21.converter.parse(score_file).expandRepeats()
         except music21.repeat.ExpanderException:
             score = music21.converter.parse(score_file)
