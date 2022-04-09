@@ -36,7 +36,7 @@ def setup_model_paths(exploratory, model_type, input_type):
         name = '_'.join([model_type, input_type, str(i)])
         while name in os.listdir('models'):
             i += 1
-            name = '_'.join([model_type, input_type, str(i)])
+            name = '_'.join([model_type, input_type, str(i)])  # incrementally create new model files
 
     folder = os.path.join('models', name)
     os.makedirs(folder, exist_ok=True if exploratory else False)
