@@ -11,13 +11,21 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import seaborn as sns
+import tensorflow as tf
 from tensorflow.python.keras.backend import clear_session
 from tensorflow.python.keras.models import load_model
 
-from config import FEATURES, NOTES, PITCH_FIFTHS, KEYS_PITCH, KEYS_SPELLING, QUALITY, DATA_FOLDER
-from load_data import load_tfrecords_dataset
-from utils import setup_tfrecords_paths, find_input_type, write_tabular_annotations
-from utils_music import Q2I, find_root_full_output
+from src.encoder_model.encoder_layer import EncoderLayer
+from src.encoder_model.encoder_model import Encoder
+from src.encoder_model.multi_head_attention import MultiHeadAttention
+from src.encoder_model.performance import plot_confusion_matrices, get_f1_prec_rec, get_pred_label_opts, get_pred_labels
+from src.micchi_et_al.data_manipulation.load_data import load_tfrecords_dataset
+from src.micchi_et_al.utils.utils import setup_tfrecords_paths, find_input_type, write_tabular_annotations
+from src.micchi_et_al.utils.utils_music import Q2I, find_root_full_output
+from src.shared_config import FEATURES, NOTES, PITCH_FIFTHS, DATA_FOLDER
+
+
+tf.random.set_seed(41)  # to ensure that validation predictions are reproducible
 
 
 # PLOTS

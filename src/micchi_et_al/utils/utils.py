@@ -6,7 +6,7 @@ import os
 
 import numpy as np
 
-from config import NOTES, QUALITY, KEYS_SPELLING, INPUT_TYPES
+from src import shared_config as shared_config
 
 
 def setup_tfrecords_paths(tfrecords_folder, tfrecords_basename, mode):
