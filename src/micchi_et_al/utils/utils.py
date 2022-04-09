@@ -161,3 +161,21 @@ def find_input_type(model_name):
     if input_type is None:
         raise AttributeError("can't determine which data needs to be fed to the algorithm...")
     return input_type
+
+
+def setup_model_paths(exploratory, model_type, input_type):
+    """Dynamically create directories for new models."""
+    os.makedirs('../../trained_models', exist_ok=True)
+    if exploratory:
+        name = 'temp'
+    else:
+        i = 0
+        name = '_'.join([model_type, input_type, str(i)])
+        while name in os.listdir('../../trained_models'):
+            i += 1
+            name = '_'.join([model_type, input_type, str(i)])  # incrementally create new model files
+
+    folder = os.path.join('../../trained_models', name)
+    os.makedirs(folder, exist_ok=True if exploratory else False)
+
+    return folder, name
