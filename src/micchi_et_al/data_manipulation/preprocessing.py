@@ -124,6 +124,7 @@ def create_tfrecords(input_type, data_folder):
     tfrecords = validate_tfrecords_paths(tfrecords, data_folder)
 
     for ds, output_file in zip(datasets, tfrecords):
+        logger.info('Starting TFRecord transformation for {ds}')
         folder = os.path.join(data_folder, ds)
         with tf.io.TFRecordWriter(output_file) as writer:
             logger.info(f'Working on {os.path.basename(output_file)}.')
@@ -155,7 +156,7 @@ def create_tfrecords(input_type, data_folder):
                         piano_roll = load_score_pitch_class(sf, FPQ)
                     else:
                         raise NotImplementedError("verify the input_type")
-                elif input_type.startswith('spelling'):
+                elif input_type.startswith('spelling'):  # if we are using pitch spelling
                     if 'complete' in input_type:
                         piano_roll, nl_pitches, nr_pitches = load_score_spelling_complete(sf, FPQ)
                     elif 'bass' in input_type:
@@ -187,7 +188,7 @@ def create_tfrecords(input_type, data_folder):
                         continue
                     if input_type.startswith('pitch'):
                         if 'complete' in input_type:
-                            pr_transposed = np.roll(piano_roll, shift=s, axis=0)
+                            pr_transposed = np.roll(piano_roll, shift=s, axis=0)  # if it's more than one octave
                         else:
                             pr_transposed = np.zeros(piano_roll.shape, dtype=np.int32)
                             for i in range(12):  # transpose the main part
@@ -204,20 +205,21 @@ def create_tfrecords(input_type, data_folder):
 
                     # definition of proximity for pitches
                     pp = 'fifth' if input_type.startswith('spelling') else 'semitone'
+                    # transpose the chord labels by s amount of semitones
                     cl_transposed = transpose_chord_labels(cl_segmented, s, pp)
-                    chords = encode_chords(cl_transposed, pp)
+                    chords = encode_chords(cl_transposed, pp)  # convert the chords to numeric representations
                     if any([x is None for c in chords for x in c]):
                         logger.warning(f"skipping transposition {s}")
                         continue
-                    if input_type.endswith('cut'):
+                    if input_type.endswith('cut'):  # they all end with 'cut'
                         start, end = 0, CHUNK_SIZE
                         while start < len(chords):
-                            chord_partial = chords[start:end]
-                            pr_partial = pr_transposed[:, 4 * start:4 * end]
+                            chord_partial = chords[start:end]  # breaking chord labels up in to segments
+                            pr_partial = pr_transposed[:, 4 * start:4 * end]  # get the corresponding piano roll for the labels
                             feature = create_feature_dictionary(pr_partial, chord_partial, fn, s, start, end)
                             writer.write(
                                 tf.train.Example(features=tf.train.Features(feature=feature)).SerializeToString())
-                            start += CHUNK_SIZE
+                            start += CHUNK_SIZE  # move on to the next segment
                             end += CHUNK_SIZE
                     else:
                         feature = create_feature_dictionary(pr_transposed, chords, fn, s)
@@ -227,7 +229,7 @@ def create_tfrecords(input_type, data_folder):
 
 if __name__ == '__main__':
     parser = ArgumentParser(description='Train a neural network for Roman Numeral analysis')
-    parser.add_argument('data_folder', dest='data_folder', action='store', type=str,
+    parser.add_argument('--data_folder', dest='data_folder', action='store', type=str,
                         help=f'a folder containing two subfolders, train and valid, each with two subfolders, chords and scores')
     parser.set_defaults(data_folder=DATA_FOLDER)
     args = parser.parse_args()
