@@ -229,7 +229,7 @@ def generate_results(data_folder, model_folder, model_name, chunk_size, dataset=
     return ys_true, ys_pred, info
 
 
-def analyse_results(ys_true, ys_pred, verbose=True):
+def analyse_results(ys_true, ys_pred, verbose=True, confusion_matrices=False):
     """
     Given the true and predicted labels, calculate several metrics on them.
     The features are key, deg1, deg2, qlt, inv, root
@@ -474,7 +474,7 @@ def compare_results(data_folder, models_folder, dataset, export_annotations):
         #     continue
         print(f"model {i + 1} out of {n} - {model_name}")
         model_folder = os.path.join(models_folder, model_name)
-        ys_true, ys_pred, info = generate_results(data_folder, model_folder, model_name, dataset, verbose=False)
+        ys_true, ys_pred, info = generate_results(data_folder=data_folder, model_folder=model_folder, model_name=model_name, dataset=dataset, verbose=False, chunk_size=160)
         if export_annotations:
             write_tabular_annotations(ys_pred, info["timesteps"], info["file_names"], os.path.join(model_folder, 'analyses'))
         accuracies = analyse_results(ys_true, ys_pred, verbose=False)
@@ -484,10 +484,6 @@ def compare_results(data_folder, models_folder, dataset, export_annotations):
 
 
 if __name__ == '__main__':
-    # dataset = 'beethoven'
-    # dataset = 'validation'
-    dataset = 'valid'
-    models_folder = os.path.join('runs', 'run_08', 'models')
 
     CONFUSION_MATRICES = True  # if confusion matrices are generated
     DATASET = 'valid'
