@@ -111,7 +111,7 @@ def plot_results(y_true, y_pred, name, start, mode='probabilities', pitch_spelli
             x = b - a
             x[b == 1] += 1
             x = x.transpose()
-            ax = sns.heatmap(x, cmap=cmap, vmin=-1, vmax=2, yticklabels=yticklabels, linewidths=.5)
+            sns.heatmap(x, cmap=cmap, vmin=-1, vmax=2, yticklabels=yticklabels, linewidths=.5, ax=ax)
             colorbar = ax.collections[0].colorbar
             colorbar.set_ticks([-5 / 8, 1 / 8, 7 / 8, 13 / 8])
             colorbar.set_ticklabels(['False Pos', 'True Neg', 'True Pos', 'False Neg'])
