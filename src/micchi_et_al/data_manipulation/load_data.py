@@ -37,7 +37,7 @@ def _parse_function(proto, n, classes_key, classes_degree, classes_quality, clas
     return (piano_roll, mask, filename, transposition, start), tuple([y_key, y_dg1, y_dg2, y_qlt, y_inv, y_roo])
 
 
-def load_tfrecords_dataset(input_path, batch_size, shuffle_buffer, input_type, repeat=True):
+def load_tfrecords_dataset(input_path, batch_size, shuffle_buffer, input_type, chunk_size, repeat=True):
     """
 
     :param input_path:
@@ -51,6 +51,7 @@ def load_tfrecords_dataset(input_path, batch_size, shuffle_buffer, input_type, r
     def _parse(proto):
         return _parse_function(proto, n, classes_key, classes_degree, classes_quality, classes_inversion, classes_root)
 
+    # this gets the input and output shapes depending on the input type, like spelling_bass_cut
     n = INPUT_TYPE2INPUT_SHAPE[input_type]
     classes_key = 30 if input_type.startswith('spelling') else 24  # Major keys: 0-11, Minor keys: 12-23
     classes_degree = 21  # 7 degrees * 3: regular, diminished, augmented
@@ -60,8 +61,8 @@ def load_tfrecords_dataset(input_path, batch_size, shuffle_buffer, input_type, r
 
     ## They pad separately for each feature!
     if input_type.endswith('cut'):
-        pad_notes = 4 * CHUNK_SIZE
-        pad_chords = CHUNK_SIZE
+        pad_notes = 4 * chunk_size
+        pad_chords = chunk_size
     else:
         pad_notes = None  # get to the max of each batch, where this value is calculated separately for each feature
         pad_chords = None
