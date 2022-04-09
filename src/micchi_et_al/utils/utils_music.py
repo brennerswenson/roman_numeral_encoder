@@ -150,7 +150,7 @@ def load_score_spelling_bass(score_file, fpq):
     b = np.argmax(pr_complete, axis=0)
     v = np.max(pr_complete, axis=0)
     t = np.arange(n_frames)
-    bf = np.vectorize(PS2PF.get)(b % 35) + 35
+    bf = np.vectorize(PS2PF.get)(b % 35) + 35  # stores info on the bass note, lowest in the chord
     piano_roll[bf, t] = v
     return piano_roll, num_flatwards, num_sharpwards
 
@@ -186,13 +186,20 @@ def load_score_pitch_complete(score_file, fpq):
     :return: piano_roll, 128 different pitches
     """
     score, n_frames = _load_score(score_file, fpq)
+    # set up the empty piano roll array
     piano_roll = np.zeros(shape=(128, n_frames), dtype=np.int32)  # MIDI numbers are between 1 and 128
     for n in score.flat.notes:
+        # get the pitches of each chord if there is one, else get the single note
         pitches = np.array([x.pitch.midi for x in n] if n.isChord else [n.pitch.midi])
+        # get the starting position where these notes are valid
         start = int(round(n.offset * fpq))
+        # calculate the end position based on the duration of the note in quarter notes
+        # multiplied by the frames per quarter note variable
         end = start + max(int(round(n.duration.quarterLength * fpq)), 1)
+        # create an array of (measures?)
         time = np.arange(start, end)
         for p in pitches:  # add notes to piano_roll
+            # create a boolean mask where those notes are present
             piano_roll[p, time] = 1
     return piano_roll[24:108]  # from C1 to B7 included
 
@@ -205,18 +212,23 @@ def load_score_pitch_bass(score_file, fpq):
     :return:
     """
     pr_complete = load_score_pitch_complete(score_file, fpq)
-    n_frames = pr_complete.shape[1]
+    n_frames = pr_complete.shape[1]  # number of frames
+    # create a piano roll instead with 12 notes for pitch class and another 12 for bass
     piano_roll = np.zeros(shape=(12 * 2, n_frames), dtype=np.int32)
 
     # associate every note with its class
+    # p is an array of all of the indexes with a played pitch (y axis)
+    # t is an array of all of the indexes of the time the pitch is played
     p, t = pr_complete.nonzero()
-    piano_roll[p % 12, t] = 1
+    # this sets all of the pitch information to 1 where it is played
+    piano_roll[p % 12, t] = 1  # divide all of the midi pitches by 12 to get their indexed notes, and set the time to 1
+    # indicating that the note is active at that time
 
     # store information on the bass
-    p = np.argmax(pr_complete, axis=0)
-    v = np.max(pr_complete, axis=0)
-    t = np.arange(n_frames)
-    piano_roll[p % 12 + 12, t] = v
+    p = np.argmax(pr_complete, axis=0)  # gets the lowest note at the time frame
+    v = np.max(pr_complete, axis=0)  # gets a mask for when chords are active
+    t = np.arange(n_frames)  # creates an empty array
+    piano_roll[p % 12 + 12, t] = v  # sets the bass value 12 semitones above the pitch class stuff in the index
 
     return piano_roll
 
@@ -267,11 +279,11 @@ def transpose_chord_labels(chord_labels, s, mode='semitone'):
     :return:
     """
 
-    def shift_note(note):
+    def shift_note(note):  # defines the function locally so it can use the s variable
         if mode == 'semitone':
             # BEWARE: this never uses flats!
             note = find_enharmonic_equivalent(note)
-            idx = ((N2I[note[0].upper()] + s - 1) if ('-' in note) else (N2I[note.upper()] + s)) % 12
+            idx = ((N2I[note[0].upper()] + s - 1) if ('-' in note) else (N2I[note.upper()] + s)) % 12  # shift by s semitones
             shifted_note = NOTES[idx] if note.isupper() else NOTES[idx].lower()
         elif mode == 'fifth':
             idx = PF2I[note.upper()] + s
@@ -302,6 +314,7 @@ def segment_chord_labels(chord_labels, n_frames, hsize=4, fpq=8):
     k = 1
     for n in range(n_frames):
         seg_time = (n * hsize / fpq)  # onset of the segment in quarter notes
+        # find the chord labels for the specific segment
         labels_found = chord_labels[np.logical_and(chord_labels['onset'] <= seg_time, seg_time < chord_labels['end'])]
         if len(labels_found) == 0:
             # raise HarmonicAnalysisError(f"Cannot read labels at frame {n}, time {seg_time}")
@@ -321,10 +334,13 @@ def segment_chord_labels(chord_labels, n_frames, hsize=4, fpq=8):
             print(
                 f"More than one chord at frame {n}, time {seg_time, seg_time + hsize / fpq}:\n{[l for l in labels_found]}")
         label = labels_found[0]
+        # k is only greater than one when a segment's labels can't get read
+        # so then it is duplicated
         for _ in range(k):
             labels.append(
                 (seg_time, label['key'], label['degree'], label['quality'], label['inversion'], label['root']))
         k = 1
+    # return a list of tuples, each one containing the segment time, degree, quality, inversion, and root
     return labels
 
 
@@ -386,7 +402,7 @@ def encode_chords(chords, mode='semitone'):
         key_enc = _encode_key(str(chord[1]), mode)
         degree_p_enc, degree_s_enc = _encode_degree(str(chord[2]))
         quality_enc = _encode_quality(str(chord[3]))
-        inversion_enc = int(chord[4])
+        inversion_enc = int(chord[4])  # already encoded
         root_enc = _encode_root(str(chord[5]), mode, chord)
 
         chords_enc.append((key_enc, degree_p_enc, degree_s_enc, quality_enc, inversion_enc, root_enc))
@@ -406,16 +422,16 @@ def _encode_degree(degree):
     """
     logger = logging.getLogger('encoding')
 
-    if '/' in degree:
+    if '/' in degree:  # in the case of secondary dominants
         num, den = degree.split('/')
         _, primary = _encode_degree(den)  # 1-indexed as usual in musicology
         _, secondary = _encode_degree(num)
         return primary, secondary
 
-    if degree[0] == '-':
+    if degree[0] == '-':  # create specific indices for minor intervals, e.g. minor sixth
         offset = 14
         degree = degree[1:]
-    elif degree[0] == '+':
+    elif degree[0] == '+':  # create specific indices for major degrees, e.g. #4 (tri-tone)
         offset = 7
         degree = degree[1:]
     elif len(degree) == 2 and degree[1] == '+':  # the case of augmented chords (only 1+ ?)
@@ -458,7 +474,7 @@ def find_chord_root(chord, pitch_spelling):
     :param pitch_spelling: if True, use the correct pitch spelling (e.g., F++ != G)
     :return: chords_full
     """
-
+    # the parameter of pitch spelling informs the F2S lookup to return the root
     # Translate chords
     key = chord['key']
     degree_str = chord['degree']
@@ -502,6 +518,7 @@ def find_chord_root(chord, pitch_spelling):
 
 
 def attach_chord_root(chord_labels, pitch_spelling=True):
+    """Find and attach the chord root for each chord in the piece."""
     return append_fields(chord_labels, 'root', np.array([find_chord_root(c, pitch_spelling) for c in chord_labels]),
                          '<U10')
 
@@ -536,7 +553,7 @@ def find_root_full_output(y_pred, pitch_spelling=True):
         key = KEYS_SPELLING[key_enc] if pitch_spelling else KEYS_PITCH[key_enc]
         key2 = SCALES[key][den]  # secondary key
         if (key.isupper() and den in [1, 2, 5, 6]) or (key.islower() and den in [0, 1, 3, 6]):
-            key2 = key2.lower()
+            key2 = key2.lower()  # change to minor for diatonic relationships in major and minor
         if den_alt == 1:
             key2 = _sharp_alteration(key2).lower()  # when the root is raised, we go to minor scale
         elif den_alt == 2:
