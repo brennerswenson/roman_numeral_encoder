@@ -1,7 +1,7 @@
 from unittest import TestCase
 import numpy as np
 
-from utils_music import calculate_number_transpositions_key
+from src.micchi_et_al.utils.utils_music import calculate_number_transpositions_key
 
 
 class TestCalculate_number_transpositions(TestCase):

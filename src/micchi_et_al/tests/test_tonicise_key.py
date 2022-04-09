@@ -1,7 +1,7 @@
 from unittest import TestCase
 
-from config import KEYS_PITCH
-from key_detection_temperley import tonicise_key
+from src.shared_config import KEYS_PITCH
+from src.micchi_et_al.models.key_detection_temperley import tonicise_key
 
 
 class TestTonicise_key(TestCase):

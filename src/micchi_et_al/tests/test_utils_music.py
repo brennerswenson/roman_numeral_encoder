@@ -1,6 +1,6 @@
 from unittest import TestCase
 
-from utils_music import _encode_degree, find_enharmonic_equivalent
+from src.micchi_et_al.utils.utils_music import _encode_degree, find_enharmonic_equivalent
 
 
 class Test(TestCase):

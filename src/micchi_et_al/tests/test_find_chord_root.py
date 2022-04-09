@@ -2,7 +2,7 @@ from unittest import TestCase
 
 import numpy as np
 
-from utils_music import find_chord_root
+from src.micchi_et_al.utils.utils_music import find_chord_root
 
 
 class TestFind_chord_root(TestCase):

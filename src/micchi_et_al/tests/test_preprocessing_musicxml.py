@@ -21,7 +21,7 @@ import xlrd
 from music21 import converter
 from music21.repeat import ExpanderException
 
-DATASET_FOLDER = os.path.join('.', 'BPS_FH_Dataset')
+DATASET_FOLDER = os.path.join('', 'BPS_FH_Dataset')
 
 FPQ = 8
 
