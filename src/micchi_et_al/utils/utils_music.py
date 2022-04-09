@@ -444,7 +444,7 @@ def _encode_degree(degree):
     while len(degree) > 2:  # This introduces some noise in the data but prevents errors in the execution
         logger.warning(f'weird degree_str: {degree}, chucking off the first char to {degree[1:]}')
         degree = degree[1:]
-    return 0, (int(degree) - 1 + offset)
+    return 0, (int(degree) - 1 + offset)  # return 0 always as secondary degree
 
 
 def find_enharmonic_equivalent(note):
@@ -457,15 +457,16 @@ def find_enharmonic_equivalent(note):
     """
     note_up = note.upper()
 
-    if note_up in NOTES:
+    if note_up in NOTES:  # if note is already uppercase
         return note
 
+    # index of the note
     n, alt = N2I[note_up[0]], list(note_up[1:])
     while alt:
         x = alt.pop(-1)
-        n = n + 1 if x == '#' else n - 1
+        n = n + 1 if x == '#' else n - 1  # if sharp add semitone, if flat subtract
     n = n % 12  # the notes are circular!
-    return NOTES[n] if note.isupper() else NOTES[n].lower()
+    return NOTES[n] if note.isupper() else NOTES[n].lower()  # return new notename
 
 
 def find_chord_root(chord, pitch_spelling):
