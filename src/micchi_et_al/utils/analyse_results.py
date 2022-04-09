@@ -72,20 +72,12 @@ def plot_results(y_true, y_pred, name, start, mode='probabilities', pitch_spelli
     :param pitch_spelling: this controls the shape and labels of the x axis in with keys
     :return:
     """
-    plt.style.use("ggplot")
     if mode not in ['probabilities', 'predictions']:
         raise ValueError('mode should be either probabilities or predictions')
-    cmap = sns.color_palette(['#d73027', '#f7f7f7', '#3027d7', '#000000']) if mode == 'predictions' else 'RdGy'
+    cmap = sns.color_palette(['#DC143C', '#FFFFFF', '#013220', '#ca9d00']) if mode == 'predictions' else 'RdGy'
 
-    tick_labels = [
-        KEYS_SPELLING if pitch_spelling else KEYS_PITCH,
-        [str(x + 1) for x in range(7)] + [str(x + 1) + 'b' for x in range(7)] + [str(x + 1) + '#' for x in range(7)],
-        [str(x + 1) for x in range(7)] + [str(x + 1) + 'b' for x in range(7)] + [str(x + 1) + '#' for x in range(7)],
-        QUALITY,
-        [str(x) for x in range(4)],
-        PITCH_FIFTHS if pitch_spelling else NOTES,
-        PITCH_FIFTHS if pitch_spelling else NOTES,
-    ]
+    tick_labels = get_pred_label_opts(pitch_spelling=pitch_spelling)
+
     ylabels = FEATURES.copy()
     ylabels.append("root_der")
     for j in range(7):
@@ -113,7 +105,7 @@ def plot_results(y_true, y_pred, name, start, mode='probabilities', pitch_spelli
                 b = y_true[j]
 
             yticklabels = tick_labels[j]
-
+        fig, ax = plt.subplots(1, 1, figsize=(8, 4.5), dpi=200)
         if mode == 'predictions':
             a = (a == np.max(a, axis=-1, keepdims=True))
             x = b - a
@@ -123,17 +115,19 @@ def plot_results(y_true, y_pred, name, start, mode='probabilities', pitch_spelli
             colorbar = ax.collections[0].colorbar
             colorbar.set_ticks([-5 / 8, 1 / 8, 7 / 8, 13 / 8])
             colorbar.set_ticklabels(['False Pos', 'True Neg', 'True Pos', 'False Neg'])
+
         else:
+
             x = b - a
             x = x.transpose()
-            ax = sns.heatmap(x, cmap=cmap, center=0, vmin=-1, vmax=1, yticklabels=yticklabels, linewidths=.5)
+            sns.heatmap(x, cmap=cmap, center=0, vmin=-1, vmax=1, yticklabels=yticklabels, linewidths=.5, ax=ax)
             colorbar = ax.collections[0].colorbar
             colorbar.set_ticks([-1, 0, +1])
             colorbar.set_ticklabels(['False Pos', 'True', 'False Neg'])
-        ax.set(ylabel=ylabels[j], xlabel='time',
-               title=f"{name}, frames [{start}, {start + x.shape[1]}) - {ylabels[j]}")
-        # figManager = plt.get_current_fig_manager()
-        # figManager.window.showMaximized()
+        ax.set(ylabel=f"Predictions: {ylabels[j]}", xlabel='Time Step',
+               title=f"Piece: {name}\nFrames: [{start}, {start + x.shape[1]}] | Task: {ylabels[j]}")
+        fig.tight_layout()
+        plt.savefig(f'{name}_{ylabels[j]}.png', dpi=200)
         plt.show()
     return
 
