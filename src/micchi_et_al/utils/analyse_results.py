@@ -179,7 +179,7 @@ def _indices_to_one_hot(data, nb_classes):
     return np.eye(nb_classes)[targets]
 
 
-def generate_results(data_folder, model_folder, model_name, dataset='valid', verbose=True):
+def generate_results(data_folder, model_folder, model_name, chunk_size, dataset='valid', verbose=True, model=None):
     """
     The generated data is always in the shape:
     y -> [data points] [outputs] (timesteps, output_features)
@@ -192,9 +192,9 @@ def generate_results(data_folder, model_folder, model_name, dataset='valid', ver
     :return: ys_true, ys_pred, (file_names, start_frames, piano_rolls)
     """
     input_type = find_input_type(model_name)
-
-    data_file, = setup_tfrecords_paths(data_folder, [dataset], input_type)
-    test_data = load_tfrecords_dataset(data_file, batch_size=16, shuffle_buffer=1, input_type=input_type, repeat=False)
+    tfrecords_dir = os.path.join(data_folder, f'{chunk_size}_chunk')
+    data_file, = setup_tfrecords_paths(tfrecords_dir, [dataset], input_type)
+    test_data = load_tfrecords_dataset(data_file, batch_size=32, shuffle_buffer=1, input_type=input_type, chunk_size=chunk_size, repeat=False)
 
     clear_session()  # Very important to avoid memory problems
     if model is None:  # load model if model object isn't passed, load from serialized custom objects
@@ -219,7 +219,7 @@ def generate_results(data_folder, model_folder, model_name, dataset='valid', ver
     temp = model.predict(test_data, verbose=True, )  # list of predictions for each y component
     ys_pred = [[d[e, :timesteps[e]] for d in temp] for e in range(n_data)]  # get individual frame predictions? 140 excerpts
 
-    del model
+    del model  # free up memory
     info = {
         "file_names": file_names,
         "start_frames": start_frames,
