@@ -9,8 +9,23 @@ import music21
 import numpy as np
 from numpy.lib.recfunctions import append_fields
 
-from config import NOTES, PITCH_FIFTHS, QUALITY, SCALES, KEYS_SPELLING, PITCH_SEMITONES, KEYS_PITCH, KEY_START_MAJ, \
-    KEY_END_MAJ, KEY_START_MIN, KEY_END_MIN, FPQ, CHUNK_SIZE
+
+from src.shared_config import (
+    NOTES,
+    PITCH_FIFTHS,
+    QUALITY,
+    SCALES,
+    KEYS_SPELLING,
+    PITCH_SEMITONES,
+    KEYS_PITCH,
+    KEY_START_MAJ,
+    KEY_END_MAJ,
+    KEY_START_MIN,
+    KEY_END_MIN,
+    FPQ,
+    CHUNK_SIZE,
+)
+
 
 F2S = dict()
 N2I = dict([(e[1], e[0]) for e in enumerate(NOTES)])
