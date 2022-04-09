@@ -34,8 +34,9 @@ logger.setLevel(logging.INFO)
 
 
 def validate_tfrecords_paths(tfrecords, data_folder):
+    # check if the files already exist
     existent = [f for f in tfrecords if os.path.isfile(f)]
-    if len(existent) > 0:
+    if len(existent) > 0:  # if the files already exist
         answer = input(
             f"{[os.path.basename(f) for f in existent]} exists already. "
             "Do you want to replace the tfrecords, backup them, write into a temporary file, or abort the calculation? "
@@ -49,11 +50,13 @@ def validate_tfrecords_paths(tfrecords, data_folder):
             print("You decided not to replace them. I guess, better safe than sorry. Goodbye!")
             quit()
 
+        # create a temporary copy of the files
         elif answer.lower().strip() == 'temp':
             tfrecords = [f.split("_")[0] for f in tfrecords]
             tfrecords = [f + "_temp.tfrecords" for f in tfrecords]
             logger.warning(f"I'm going to write the files to {tfrecords[0]} and similar!")
 
+        # creates a backup of the files
         elif answer.lower().strip() == 'backup':
             i = 0
             tfrecords_backup = [f.split(".") for f in tfrecords]
@@ -72,6 +75,7 @@ def validate_tfrecords_paths(tfrecords, data_folder):
             logger.warning(
                 f"existing data backed up with backup index {i}, new data will be in {tfrecords[0]} and similar")
 
+        # replace all of the old data
         elif answer.lower().strip() == 'replace':
             logger.warning(
                 f"you chose to replace the old data with new one; the old data will be erased in the process")
@@ -84,7 +88,7 @@ def create_feature_dictionary(piano_roll, chords, name, s=None, start=None, end=
         'name': tf.train.Feature(bytes_list=tf.train.BytesList(value=[name.encode('utf-8')])),
         'transposition': tf.train.Feature(int64_list=tf.train.Int64List(value=[s])),
         'piano_roll': tf.train.Feature(float_list=tf.train.FloatList(value=piano_roll.reshape(-1))),
-        'label_key': tf.train.Feature(int64_list=tf.train.Int64List(value=[c[0] for c in chords])),
+        'label_key': tf.train.Feature(int64_list=tf.train.Int64List(value=[c[0] for c in chords])),  # repeat the label for each frame
         'label_degree_primary': tf.train.Feature(
             int64_list=tf.train.Int64List(value=[c[1] for c in chords])),
         'label_degree_secondary': tf.train.Feature(
@@ -129,15 +133,19 @@ def create_tfrecords(input_type, data_folder):
             for fn in file_names:
                 # if fn not in ['bsq_op127_no12_mov2']:
                 #     continue
-                sf = os.path.join(scores_folder, fn + ".mxl")
-                cf = os.path.join(chords_folder, fn + ".csv")
+                sf = os.path.join(scores_folder, fn + ".mxl")  # score file
+                cf = os.path.join(chords_folder, fn + ".csv")  # chord file
 
                 logger.info(f"Analysing {fn}")
-                chord_labels = load_chord_labels(cf)
+                # an array of tuples with chords and their qualities in addition to their durations
+                # load in the chord truth data, WITHOUT the chord's ROOT
+                chord_labels = load_chord_labels(cf)  # (start, end, key, degree, quality, inversion)
+                # find the chord roots for each chord
+                # cl_full has the chord's root note attached to it
                 cl_full = attach_chord_root(chord_labels, input_type.startswith('spelling'))
 
                 # Load piano_roll and calculate transpositions to the left and right
-                if input_type.startswith('pitch'):
+                if input_type.startswith('pitch'):  # if we are using chromatic intervals (0 - 12)
                     nl, nr = 6, 6
                     if 'complete' in input_type:
                         piano_roll = load_score_pitch_complete(sf, FPQ)
