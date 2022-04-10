@@ -1,3 +1,9 @@
+"""
+Module defining the MultiHeadAttention object. Can use relative or absolute positional encodings.
+Highly leverages code from TensorFlow's Transformer tutorial as well as their tensor2tensor library.
+All non-original code contains a URL citation in the docstring.
+"""
+
 import tensorflow as tf
 from tensorflow.python.keras.layers import Dense, Dropout, LayerNormalization
 
