@@ -1,7 +1,15 @@
+"""
+The EncoderLayer class is defined in this module. Each encoder layer has a MultiHeadAttention
+object as a class attribute which calculates the attention scores for the model.
+
+Encoder Layer code loosely based off of the TensorFlow Transformer tutorial:
+https://www.tensorflow.org/text/tutorials/transformer
+"""
+
 import tensorflow as tf
 
 from src.encoder_model.encoder_utils import point_wise_feed_forward_network
-from src.encoder_model.multi_head_attention import MultiHeadAttention
+from src.encoder_model.attention import MultiHeadAttention
 
 
 class EncoderLayer(tf.keras.layers.Layer):

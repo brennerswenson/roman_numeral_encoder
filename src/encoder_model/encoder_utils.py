@@ -1,10 +1,14 @@
+"""
+Utils functions for constructing RN Encoder model. Any functions with URLs
+in the docstring are not mine.
+"""
 import math
 
 import numpy as np
 import tensorflow as tf
 from tensorflow.python.keras.layers import AveragePooling1D, MaxPooling1D
 
-from src.encoder_model.multi_head_attention import _generate_relative_positions_matrix
+from src.encoder_model.attention import _generate_relative_positions_matrix
 
 
 class CustomSchedule(tf.keras.optimizers.schedules.LearningRateSchedule):

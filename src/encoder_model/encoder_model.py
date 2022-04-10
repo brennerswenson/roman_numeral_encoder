@@ -1,3 +1,8 @@
+"""
+The RN Encoder model is defined in this module, as well as functions for constructing it.
+The Encoder class is based on the TensorFlow Transformer tutorial code: https://www.tensorflow.org/text/tutorials/transformer
+"""
+
 import tensorflow as tf
 from tensorflow.keras.layers import (
     Dropout,

@@ -1,3 +1,7 @@
+"""
+Code related to the analysis of the RN model's outputs.
+"""
+
 from collections import OrderedDict
 
 import matplotlib as mpl

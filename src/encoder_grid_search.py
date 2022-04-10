@@ -1,3 +1,6 @@
+"""Executable Python script to run grid search to find optimal hyperparameter configurations.
+Randomly iterates through the cartesian product of all hyperparameter arrays defined in src/grid_search_config.py.
+"""
 import random
 import subprocess
 import itertools

@@ -1,3 +1,4 @@
+"""RN model utils."""
 import csv
 
 import tensorflow as tf

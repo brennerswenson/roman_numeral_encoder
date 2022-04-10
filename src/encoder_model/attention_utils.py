@@ -1,3 +1,10 @@
+"""
+Utils functions related to self-attention calculation. Functions here are
+largely from the TensorFlow tensor2tensor library.
+
+https://github.com/tensorflow/tensor2tensor
+"""
+
 import tensorflow as tf
 
 

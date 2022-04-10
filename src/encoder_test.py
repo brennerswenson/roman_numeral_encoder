@@ -1,3 +1,6 @@
+"""
+Load this project's best model, annotate the validation dataset, and produce various prediction results.
+"""
 import os
 from datetime import datetime
 

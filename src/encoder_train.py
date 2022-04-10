@@ -1,3 +1,7 @@
+"""
+Script configurable via argparse to construct and train the RN encoder model. This script is called via
+the subprocess module by the grid search module. Hyperparameters are defined in the argparse argument list.
+"""
 import argparse
 import gc
 import logging
