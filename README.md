@@ -86,6 +86,10 @@ To set up your environment, ensure you are in the working directory, and run:
 Prior to training a model, ensure that you have ran `src/micchi_et_al/data_manipulation/preprocessing.py`, as well as `train_validation_split.py` in the same directory.
 Those modules will iterate through the dataset and create TFRecord files in lengths of `CHUNK_SIZE`. 
 
+The score XML and chord annotation files are locaed in the `/data` directory. Due to GitHub's limitations
+on dataset sizes, the already processed TFRecords for train/validation could not be uploaded. These data
+will be provided separately in the submission via a OneDrive link.
+
 To train a model with the best configurations identified during this project, run this command:
 - `python -m src.encoder_train`
 
