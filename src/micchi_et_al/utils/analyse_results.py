@@ -17,7 +17,7 @@ from tensorflow.python.keras.models import load_model
 
 from src.encoder_model.encoder_layer import EncoderLayer
 from src.encoder_model.encoder_model import Encoder
-from src.encoder_model.multi_head_attention import MultiHeadAttention
+from src.encoder_model.attention import MultiHeadAttention
 from src.encoder_model.performance import plot_confusion_matrices, get_f1_prec_rec, get_pred_label_opts, get_pred_labels
 from src.micchi_et_al.data_manipulation.load_data import load_tfrecords_dataset
 from src.micchi_et_al.utils.utils import setup_tfrecords_paths, find_input_type, write_tabular_annotations
