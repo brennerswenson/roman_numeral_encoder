@@ -170,7 +170,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "-b",
         "--batch-size",
-        default=64,
+        default=32,
         type=int,
         help="Batch size for training"
     )
@@ -184,7 +184,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "-lr",
         "--learning-rate",
-        default=0.00133,
+        default=0.001,
         type=float,
         help="Max learning rate used during training",
     )
@@ -198,7 +198,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "-d",
         "--dropout-rate",
-        default=0.25,
+        default=0.33,
         type=float,
         help="Dropout rate used on Linear layers of neural network.",
     )
@@ -270,21 +270,21 @@ if __name__ == "__main__":
     parser.add_argument(
         "-wu",
         "--warm-up-steps",
-        default=4000,
+        default=0,
         type=int,
         help="Number of warm up steps in learning rate scheduler.",
     )
     parser.add_argument(
         "-md",
         "--max-distance",
-        default=128,
+        default=0,
         type=int,
         help="Maximum distance used when calculating relative positional encoding.",
     )
     parser.add_argument(
         "-dmm",
         "--d-model-multiplier",
-        default=64,
+        default=1,
         type=int,
         help="Factor to mutiply the model dimension by when calculating learning rate schedule.",
     )
@@ -307,7 +307,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "-dg1-nel",
         "--degree-1-nel",
-        default=1,
+        default=2,
         type=int,
         help="Number of encoder layers for the degree 1 encoder.",
     )
@@ -328,7 +328,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "-inv-nel",
         "--inversion-nel",
-        default=1,
+        default=2,
         type=int,
         help="Number of encoder layers for the inversion encoder.",
     )
@@ -342,14 +342,14 @@ if __name__ == "__main__":
     parser.add_argument(
         "-r-nel",
         "--root-nel",
-        default=4,
+        default=3,
         type=int,
         help="Number of encoder layers for the root encoder.",
     )
     parser.add_argument(
         "-dg1-nah",
         "--degree-1-nah",
-        default=1,
+        default=3,
         type=int,
         help="Number of attention heads for the degree 1 encoder layers.",
     )
@@ -363,28 +363,28 @@ if __name__ == "__main__":
     parser.add_argument(
         "-q-nah",
         "--quality-nah",
-        default=20,
+        default=4,
         type=int,
         help="Number of attention heads for the quality encoder layers.",
     )
     parser.add_argument(
         "-inv-nah",
         "--inversion-nah",
-        default=3,
+        default=1,
         type=int,
         help="Number of attention heads for the inversion encoder layers.",
     )
     parser.add_argument(
         "-k-nah",
         "--key-nah",
-        default=5,
+        default=1,
         type=int,
         help="Number of attention heads for the key encoder layers.",
     )
     parser.add_argument(
         "-r-nah",
         "--root-nah",
-        default=2,
+        default=1,
         type=int,
         help="Number of attention heads for the root encoder layers.",
     )
@@ -454,21 +454,21 @@ if __name__ == "__main__":
     parser.add_argument(
         "-eps",
         "--epsilon",
-        default=2e-9,
+        default=1e-9,
         type=float,
         help="epsilon parameter for Adam optimizer."
     )
     parser.add_argument(
         "-lse",
         "--label-smoothing-eps",
-        default=0.2,
+        default=0.5275,
         type=float,
         help="epsilon parameter loss function label smooothing."
     )
     parser.add_argument(
         "-kd",
         "--key-dropout",
-        default=0.33,
+        default=0.15,
         type=float,
         help="Dropout to use in the key encoder stack."
     )

@@ -35,7 +35,7 @@ HP_ROOT_NEL = hp.HParam('root_nel', hp.Discrete([3]))
 
 # number of attention heads for each task
 HP_DG1_NAH = hp.HParam('dg1_nah', hp.Discrete([3]))
-HP_DG2_NAH = hp.HParam('dg2_nah', hp.Discrete([21, 49]))  # probably just stick with 3
+HP_DG2_NAH = hp.HParam('dg2_nah', hp.Discrete([3]))  # probably just stick with 3
 HP_QUALITY_NAH = hp.HParam('quality_nah', hp.Discrete([4]))
 HP_INVERSION_NAH = hp.HParam('inversion_nah', hp.Discrete([1]))
 HP_KEY_NAH = hp.HParam('key_nah', hp.Discrete([1]))
