@@ -9,7 +9,7 @@ from src.shared_config import DATA_FOLDER
 
 CONFUSION_MATRICES = True  # if confusion matrices are generated
 DATASET = 'valid'
-MODELS_FOLDER = os.path.join('trained_models')
+MODELS_FOLDER = os.path.join('src/trained_models')
 CHUNK_SIZE = 160
 MODEL_NAME = 'encoder_spelling_bass_cut_44'
 

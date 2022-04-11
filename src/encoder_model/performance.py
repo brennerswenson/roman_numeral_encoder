@@ -4,6 +4,7 @@ Code related to the analysis of the RN model's outputs.
 
 from collections import OrderedDict
 
+import warnings
 import matplotlib as mpl
 
 import numpy as np
@@ -14,6 +15,7 @@ from sklearn.metrics import confusion_matrix, f1_score, recall_score, precision_
 
 from src.shared_config import FEATURES, KEYS_SPELLING, KEYS_PITCH, QUALITY, PITCH_FIFTHS, NOTES
 
+warnings.filterwarnings("ignore")
 # plotting configurations
 sns.set()
 

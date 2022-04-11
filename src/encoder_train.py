@@ -291,7 +291,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "-ls",
         "--learning-rate-scheduler",
-        default='custom',
+        default='exponential',
         type=str,
         choices=['custom', 'exponential'],
         help="Determines which learning rate scheduler to use during training.",

@@ -1,5 +1,6 @@
 """RN model utils."""
 import csv
+from pathlib import Path
 
 import tensorflow as tf
 from tensorboard.plugins.hparams import api as hp
@@ -110,7 +111,11 @@ def print_cli_args(cli_args):
 
 def write_hparams_csv(cli_args, model_name):
     """Write a .csv file containing hyperparameter options for each model run."""
-    with open('logs/hparams/' + model_name + '_hparams.csv', 'w', newline='') as csv_file:
+    hparams_folder = 'logs/hparams/'
+    filename = hparams_folder + model_name + '_hparams.csv'
+    path = Path(hparams_folder)
+    path.mkdir(parents=True, exist_ok=True)
+    with open(filename, 'w', newline='') as csv_file:
         writer = csv.writer(csv_file)  # save down a copy of the hyperparameters in a csv
         for arg in vars(cli_args):
             writer.writerow([arg, getattr(cli_args, arg)])
