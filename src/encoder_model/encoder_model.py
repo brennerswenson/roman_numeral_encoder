@@ -1,6 +1,7 @@
 """
 The RN Encoder model is defined in this module, as well as functions for constructing it.
-The Encoder class is based on the TensorFlow Transformer tutorial code: https://www.tensorflow.org/text/tutorials/transformer
+The Encoder class is based on the TensorFlow Transformer tutorial code:
+https://www.tensorflow.org/text/tutorials/transformer
 """
 
 import tensorflow as tf
@@ -43,10 +44,14 @@ class Encoder(tf.keras.layers.Layer):
             num_heads (int): Number of heads to use when calculating self-attention scores.
                 This must be true: d_model % num_heads == 0
             dff (int): Dimension of Feed Forward layer after attention block in each encoder layer.
-            maximum_position_encoding (int): Determines the size number of time steps of the positional encoding array. 
-            rate (float): Dropout rate between 0 and 1 that is used in the dropout layer after calculating attention weights, and after the feed forward layer.
-            relative (bool): Boolean flag indicating whether or not to use relative or absolute positional encoding within the attention block.
-            max_distance (int): Maximum distance in both forward and backward directions that relative positional encoding will utilise when clipping values.
+            maximum_position_encoding (int): Determines the size number of time steps of the positional
+                encoding array.
+            rate (float): Dropout rate between 0 and 1 that is used in the dropout layer after calculating
+                attention weights, and after the feed forward layer.
+            relative (bool): Boolean flag indicating whether or not to use relative or absolute positional
+                encoding within the attention block.
+            max_distance (int): Maximum distance in both forward and backward directions that relative
+                positional encoding will utilise when clipping values.
             **kwargs:
         """
         super(Encoder, self).__init__(**kwargs)
@@ -60,7 +65,8 @@ class Encoder(tf.keras.layers.Layer):
         self.relative = relative
         self.max_distance = max_distance
 
-        self.pos_encoding = positional_encoding(self.max_pos_encoding, self.d_model)  # get positional encoding vector
+        # get positional encoding vector
+        self.pos_encoding = positional_encoding(self.max_pos_encoding, self.d_model)
 
         self.enc_layers = [
             EncoderLayer(
@@ -79,7 +85,8 @@ class Encoder(tf.keras.layers.Layer):
         self.dropout = tf.keras.layers.Dropout(self.rate, name=f"{self.name}_dropout")
 
     def get_config(self):
-        """# https://stackoverflow.com/questions/58678836/notimplementederror-layers-with-arguments-in-init-must-override-get-conf"""
+        """# https://stackoverflow.com/questions/58678836/notimplementederror-layers-
+        with-arguments-in-init-must-override-get-conf"""
         config = super().get_config().copy()
         config.update(
             {
@@ -100,21 +107,22 @@ class Encoder(tf.keras.layers.Layer):
         seq_len = tf.shape(x)[1]
 
         # (batch_size, time_steps, pitches), eg (128, 160, 70)
-        x *= tf.math.sqrt(tf.cast(self.d_model, tf.float32))  # why is this multiplied like this?
+        x *= tf.math.sqrt(tf.cast(self.d_model, tf.float32))
         x += self.pos_encoding[:, :seq_len, :]
         x = self.dropout(x, training=is_training)
 
         for i in range(self.num_layers):
-            x = self.enc_layers[i](x, is_training=is_training, mask=mask)  # how does this work? so x is iteratively updated throughout the layers?
+            x = self.enc_layers[i](x, is_training=is_training, mask=mask)
         return x  # (batch_size, input_seq_len, d_model)
 
 
-def build_task_model(x, enc, num_classes, task, dff_2, dropout_rate, pool_type, is_training=False, concat_layers=[]):
+def build_task_model(x, enc, num_classes, task, dff_2,
+                     dropout_rate, pool_type, is_training=False, concat_layers=[]):
     """
-    Downsamples input data using provided method, passes batch through instantiated encoder applying self attention.
-    Optionally concatenates the outputs of other task models to further inform the decision of the current task. Applies
-    regularization layers like Dropout and LayerNorm to prevent overfitting and gradient explosion. Returns prediction
-    probabilities via softmax activation function.
+    Downsamples input data using provided method, passes batch through instantiated encoder applying
+    self attention. Optionally concatenates the outputs of other task models to further inform the decision
+    of the current task. Applies regularization layers like Dropout and LayerNorm to prevent overfitting
+    and gradient explosion. Returns prediction probabilities via softmax activation function.
     Args:
         x: Input batch
         enc (encoder object): Encoder object for an individual Roman numeral task.
@@ -124,7 +132,8 @@ def build_task_model(x, enc, num_classes, task, dff_2, dropout_rate, pool_type, 
         dropout_rate (float): Dropout used in between Encoder and hidden layer.
         pool_type (str): Determines the downsampling method prior to going through the encoder stack.
         is_training (bool): Indicates whether or not to use random weights in regularization layers.
-        concat_layers (bool): List of output layers from previous models to include in the predictions of the current layer.
+        concat_layers (bool): List of output layers from previous models to include in the
+            predictions of the current layer.
 
     Returns:
         Tensor of dimension (batch_size, num_classes)
@@ -134,7 +143,8 @@ def build_task_model(x, enc, num_classes, task, dff_2, dropout_rate, pool_type, 
 
     if concat_layers:  # add outputs from previous layers if applicable
         for idx, conc_layer in enumerate(concat_layers):
-            x = Concatenate(name=f"{task}_{idx}_concat")([x, conc_layer])  # optionally add key predictions to degree inputs
+            # optionally add key predictions to degree inputs
+            x = Concatenate(name=f"{task}_{idx}_concat")([x, conc_layer])
 
     x = enc(x, is_training=is_training, mask=None)  # (batch_size, seq_len, pitches)
     x = LayerNormalization(name=f"{task}_mt_ln_1")(x, training=is_training)
@@ -145,30 +155,35 @@ def build_task_model(x, enc, num_classes, task, dff_2, dropout_rate, pool_type, 
     return output
 
 
-def get_encoder_stacks(x, encoder_dict, input_type, dff_2, dropout_rate, pool_type, key_chain, quality_chain, is_training=False):
+def get_encoder_stacks(x, encoder_dict, input_type, dff_2,
+                       dropout_rate, pool_type, key_chain, quality_chain, is_training=False):
     """
-    Construct the model around the instantiated encoder stacks and relate the task models together. Returns the predictions
-    in an array containing the output matrices for each batch per task.
+    Construct the model around the instantiated encoder stacks and relate the task models together.
+    Returns the predictions in an array containing the output matrices for each batch per task.
 
     Args:
         x (Tensor): Input batch
-        encoder_dict (dict): Dictionary of encoder objects containing layers of multitask attention mechanisms.
-            Dict keys are the individual roman numeral tasks.
+        encoder_dict (dict): Dictionary of encoder objects containing layers of multitask
+            attention mechanisms. Dict keys are the individual roman numeral tasks.
         input_type (str): Type of input representation, determines the prediction labels.
         dff_2 (int): Dimension of the hidden layer between the Encoder stack and output layer.
         dropout_rate (float): Dropout used in between task's Encoder and hidden layer.
         pool_type (str): Determines the downsampling method prior to going through the encoder stack.
-        key_chain (bool): Boolean indicating if predictions from key task should be passed on to all other tasks.
-        quality_chain (bool): Boolean indicating if quality predictions are to be concatenated to input prior to
-            the inversion and degree task encoders.
-        is_training (bool): Indicates if random weights are to be used in regularization layers. Defaults to False.
+        key_chain (bool): Boolean indicating if predictions from key task should be passed on to
+            all other tasks.
+        quality_chain (bool): Boolean indicating if quality predictions are to be concatenated to
+            input prior to the inversion and degree task encoders.
+        is_training (bool): Indicates if random weights are to be used in regularization layers.
+            Defaults to False.
 
     Returns:
         List of output matrices in order [key, degree_1, degree_2, quality, inversion, root]
     """
     classes_key = 30 if input_type.startswith("spelling") else 24  # Major keys: 0-11, Minor keys: 12-23
-    classes_degree = 21  # 7 degrees * 3: regular, diminished, augmented
-    classes_root = 35 if input_type.startswith("spelling") else 12  # the twelve notes without enharmonic duplicates
+    # 7 degrees * 3: regular, diminished, augmented
+    classes_degree = 21
+    # the twelve notes without enharmonic duplicates
+    classes_root = 35 if input_type.startswith("spelling") else 12
     classes_quality = 12  # ['M', 'm', 'd', 'a', 'M7', 'm7', 'D7', 'd7', 'h7', 'Gr+6', 'It+6', 'Fr+6']
     classes_inversion = 4  # root position, 1st, 2nd, and 3rd inversion (the last only for seventh chords)
 
@@ -229,8 +244,8 @@ def get_encoder_stacks(x, encoder_dict, input_type, dff_2, dropout_rate, pool_ty
         pool_type=pool_type,
         concat_layers=concat_layers,
         is_training=is_training,
-    )
-    inversion = build_task_model(  # should be informed by key and quality because only 7th notes have certain inversions
+    ) # should be informed by key and quality because only 7th notes have certain inversions
+    inversion = build_task_model(
         x,
         enc=encoder_dict["inv"],
         num_classes=classes_inversion,
@@ -259,20 +274,28 @@ def create_rn_model(
     dropout_rate=0.15,
 ):
     """
-    Instantiates an Encoder Block for each of the RN component tasks. Model input dimensions can vary if key_chain or quality_chain are True.
-    Passes the instantiated Encoder blocks to a function that generates predictions for each task and returns them in a list.
+    Instantiates an Encoder Block for each of the RN component tasks. Model input dimensions can vary
+    if key_chain or quality_chain are True. Passes the instantiated Encoder blocks to a function that
+    generates predictions for each task and returns them in a list.
     Args:
         d_model (int): Number of features in the input vector. Used when calculating MHA depth.
         dff_1 (int): Dimension of Feed Forward layer after attention block.
-        max_pos_encoding (int): Indicates the size of the positional encoding matrix. This project used 640 (160 * 4).
-        input_type (str): Type of input encoding used for model training. This project uses 'spelling_complete_cut'.
+        max_pos_encoding (int): Indicates the size of the positional encoding matrix.
+            This project used 640 (160 * 4).
+        input_type (str): Type of input encoding used for model training. This project uses
+            'spelling_complete_cut'.
         dff_2 (int): Dimension of hidden Feed Forward layer prior to softmax activation layer.
-        pool_type (str): Type of downsampling method used on the input sequence to reduce dimensionality to match output chord frequency.
-        key_chain (bool): Boolean flag indicating if the outputs from the Key task are to be concatenated to other task inputs.
-        quality_chain (bool): Boolean flag indicating if the outputs from the Quality task are to be concatenated to other downstream tasks.
-        max_distance (int): Maximum distance in both forward and backward directions that relative positional encoding will utilise when clipping values.
+        pool_type (str): Type of downsampling method used on the input sequence to reduce
+            dimensionality to match output chord frequency.
+        key_chain (bool): Boolean flag indicating if the outputs from the Key task are to be
+            concatenated to other task inputs.
+        quality_chain (bool): Boolean flag indicating if the outputs from the Quality task are
+            to be concatenated to other downstream tasks.
+        max_distance (int): Maximum distance in both forward and backward directions that
+            relative positional encoding will utilise when clipping values.
         h_params (dict): Dictionary of hyperparameters passed via the command line.
-        is_training (bool): Indicates if the model is in a training stage or not. Useful for dropout layers that use random components.
+        is_training (bool): Indicates if the model is in a training stage or not. Useful for
+            dropout layers that use random components.
         dropout_rate (float): Dropout rate to use in all model dropout layers.
 
     Returns:
@@ -287,8 +310,10 @@ def create_rn_model(
     dg_quality = d_model + 30 if key_chain else d_model  # chain key predictions 100
     dg_root = d_model + 30 if key_chain else d_model  # 100
 
-    dg_d_model_inv = d_model + 30 + 35 if key_chain else d_model  # add key and root to chain (root informed by key, too)  135 or 70
-    dg_d_model_inv = dg_d_model_inv + 12 if quality_chain else dg_d_model_inv  # add quality outputs if also chained 147 or 82
+    # add key and root to chain (root informed by key, too)  135 or 70
+    dg_d_model_inv = d_model + 30 + 35 if key_chain else d_model
+    # add quality outputs if also chained 147 or 82
+    dg_d_model_inv = dg_d_model_inv + 12 if quality_chain else dg_d_model_inv
 
     key_enc = Encoder(  # which key the chords relate to
         num_layers=h_params[hp_config.HP_KEY_NEL],

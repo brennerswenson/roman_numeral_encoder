@@ -44,7 +44,8 @@ class CustomSchedule(tf.keras.optimizers.schedules.LearningRateSchedule):
 def layers():
     """
     Get the layers module good for TF 1 and TF 2 work for now.
-    From https://github.com/tensorflow/tensor2tensor/blob/2a33b152d7835af66a6d20afe7961751047e28dd/tensor2tensor/layers/common_layers.py#L41
+    From https://github.com/tensorflow/tensor2tensor/blob/2a33b152d7835af66a6d20afe7961751047e28dd/
+    tensor2tensor/layers/common_layers.py#L41
     """
     layers_module = None
     try:
@@ -66,7 +67,8 @@ def dense(x, units, **kwargs):
     """
     Identical to layers.dense.
 
-    From https://github.com/tensorflow/tensor2tensor/blob/2a33b152d7835af66a6d20afe7961751047e28dd/tensor2tensor/layers/common_layers.py#L3028
+    From https://github.com/tensorflow/tensor2tensor/blob/2a33b152d7835af66a6d20afe7961751047e28dd
+    /tensor2tensor/layers/common_layers.py#L3028
     """
     layer_collection = kwargs.pop("layer_collection", None)
     activations = layers().Dense(units, **kwargs)(x)
@@ -96,7 +98,8 @@ def dense(x, units, **kwargs):
             x_2d = tf.reshape(x, [-1, x_shape[2]])
             activations_shape = activations.shape.as_list()
             activations_2d = tf.reshape(activations, [-1, activations_shape[2]])
-            layer_collection.register_fully_connected_multi(layer_params, x_2d, activations_2d, num_uses=x_shape[1])
+            layer_collection.register_fully_connected_multi(
+                layer_params, x_2d, activations_2d, num_uses=x_shape[1])
             activations = tf.reshape(activations_2d, activations_shape)
         else:
             layer_collection.register_fully_connected(layer_params, x, activations)
@@ -168,7 +171,8 @@ def get_absolute_position_encoding(length, hidden_size, min_timescale=1.0, max_t
 def get_rel_pos_enc(num_steps, num_units, max_distance=10):
     """
     Generate relative positional encodings.
-    From https://github.com/tensorflow/tensor2tensor/blob/5623deb79cfcd28f8f8c5463b58b5bd76a81fd0d/tensor2tensor/layers/common_attention.py#L1670
+    From https://github.com/tensorflow/tensor2tensor/blob/5623deb79cfcd28f8f8c5463b58b5bd76a81fd0d/
+    tensor2tensor/layers/common_attention.py#L1670
     """
     rel_matrix = _generate_relative_positions_matrix(num_steps, num_steps, max_distance)
     size_voc = max_distance * 2 + 1

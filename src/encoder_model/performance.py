@@ -141,8 +141,10 @@ def get_pred_label_opts(pitch_spelling, return_dict=False):
     """
     tick_labels = [
         KEYS_SPELLING if pitch_spelling else KEYS_PITCH,  # keys
-        [str(x + 1) for x in range(7)] + [str(x + 1) + 'b' for x in range(7)] + [str(x + 1) + '#' for x in range(7)],  # DEGREE 1
-        [str(x + 1) for x in range(7)] + [str(x + 1) + 'b' for x in range(7)] + [str(x + 1) + '#' for x in range(7)],  # DEGREE 2
+        [str(x + 1) for x in range(7)] + [str(x + 1) + 'b' for x in range(7)]
+        + [str(x + 1) + '#' for x in range(7)],  # DEGREE 1
+        [str(x + 1) for x in range(7)] + [str(x + 1) + 'b' for x in range(7)]
+        + [str(x + 1) + '#' for x in range(7)],  # DEGREE 2
         QUALITY,  # QUALITY
         [str(x) for x in range(4)],  # INVERSION
         PITCH_FIFTHS if pitch_spelling else NOTES,  #
@@ -150,8 +152,11 @@ def get_pred_label_opts(pitch_spelling, return_dict=False):
     ]
 
     if return_dict:  # optionally return an ordered dict of each task as opposed to an array
-        tick_labels = [OrderedDict({k: v for k, v in enumerate(tick_labels[index])}) for index in range(0, 6)]
-
+        tick_labels = [
+            OrderedDict(
+                {k: v for k, v in enumerate(tick_labels[index])})
+            for index in range(0, 6)
+        ]
     return tick_labels
 
 

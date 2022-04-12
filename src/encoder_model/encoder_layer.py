@@ -27,9 +27,12 @@ class EncoderLayer(tf.keras.layers.Layer):
             num_heads (int): Number of attention heads to use.
             dff (int): Dimension of Feed Forward layer after attention block.
             layer_num (int): Numeric identifier for each encoder layer in the encoder stack.
-            relative (bool): Boolean flag indicating whether or not to use relative or absolute positional encoding within the attention block.
-            max_distance (int): Maximum distance in both forward and backward directions that relative positional encoding will utilise when clipping values.
-            rate (float): Dropout rate between 0 and 1 that is used in the dropout layer after calculating attention weights, and after the feed forward layer.
+            relative (bool): Boolean flag indicating whether or not to use relative or absolute positional
+                encoding within the attention block.
+            max_distance (int): Maximum distance in both forward and backward directions that relative
+                positional encoding will utilise when clipping values.
+            rate (float): Dropout rate between 0 and 1 that is used in the dropout layer after calculating
+                attention weights, and after the feed forward layer.
         """
         super(EncoderLayer, self).__init__(**kwargs)
 
@@ -53,15 +56,22 @@ class EncoderLayer(tf.keras.layers.Layer):
         )
         # construct dense layer with normalization and configure dropout layers
         self.ffn = point_wise_feed_forward_network(self.d_model, self.dff, layer_num, name=self.name)
-        self.layernorm1 = tf.keras.layers.LayerNormalization(epsilon=1e-5, name=f"{self.name}_layernorm1_{self.layer_num}")
-        self.layernorm2 = tf.keras.layers.LayerNormalization(epsilon=1e-5, name=f"{self.name}_layernorm2_{self.layer_num}")
+        self.layernorm1 = tf.keras.layers.LayerNormalization(
+            epsilon=1e-5,
+            name=f"{self.name}_layernorm1_{self.layer_num}"
+        )
+        self.layernorm2 = tf.keras.layers.LayerNormalization(
+            epsilon=1e-5,
+            name=f"{self.name}_layernorm2_{self.layer_num}"
+        )
         self.dropout1 = tf.keras.layers.Dropout(self.rate, name=f"{self.name}_dropout1_{self.layer_num}")
         self.dropout2 = tf.keras.layers.Dropout(self.rate, name=f"{self.name}_dropout2_{self.layer_num}")
 
     def get_config(self):
         """
         Necessary to override this method so the model can be saved and reloaded.
-        https://stackoverflow.com/questions/58678836/notimplementederror-layers-with-arguments-in-init-must-override-get-conf
+        https://stackoverflow.com/questions/58678836/notimplementederror-layers-with-arguments-in
+        -init-must-override-get-conf
         """
         config = super().get_config().copy()
         config.update(

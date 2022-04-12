@@ -9,7 +9,8 @@ import tensorflow as tf
 
 
 def get_closest_split(n, close_to):
-    """From https://stackoverflow.com/questions/57154745/how-to-find-nearest-divisor-to-given-value-with-modulo-zero"""
+    """From https://stackoverflow.com/questions/57154745/how-to-find-nearest-
+    divisor-to-given-value-with-modulo-zero"""
     all_divisors = get_divisors(n)
     for ix, val in enumerate(all_divisors):
         if close_to < val:
@@ -23,7 +24,8 @@ def get_closest_split(n, close_to):
 def split_last_dimension(x, n):
     """Reshape x so that the last dimension becomes two dimensions.
 
-    From https://github.com/tensorflow/tensor2tensor/blob/5623deb79cfcd28f8f8c5463b58b5bd76a81fd0d/tensor2tensor/layers/common_attention.py#L1145
+    From https://github.com/tensorflow/tensor2tensor/blob/5623deb79cfcd28f8f8c5463b58b5bd76a81fd0d/
+    tensor2tensor/layers/common_attention.py#L1145
 
     The first of these two dimensions is n.
 
@@ -44,7 +46,8 @@ def split_last_dimension(x, n):
 def split_heads(x, num_heads):
     """
     Split channels (dimension 2) into multiple heads (becomes dimension 1).
-    From https://github.com/tensorflow/tensor2tensor/blob/5623deb79cfcd28f8f8c5463b58b5bd76a81fd0d/tensor2tensor/layers/common_attention.py#L1198
+    From https://github.com/tensorflow/tensor2tensor/blob/5623deb79cfcd28f8f8c5463b58b5bd76a81fd0d/
+    tensor2tensor/layers/common_attention.py#L1198
 
     Args:
       x: a Tensor with shape [batch, length, channels]
@@ -58,7 +61,8 @@ def split_heads(x, num_heads):
 
 def combine_heads(x):
     """Inverse of split_heads.
-    From https://github.com/tensorflow/tensor2tensor/blob/5623deb79cfcd28f8f8c5463b58b5bd76a81fd0d/tensor2tensor/layers/common_attention.py#L1242
+    From https://github.com/tensorflow/tensor2tensor/blob/5623deb79cfcd28f8f8c5463b58b5bd76a81fd0d/
+    tensor2tensor/layers/common_attention.py#L1242
     Args:
       x: a Tensor with shape [batch, num_heads, length, channels / num_heads]
 
@@ -71,7 +75,8 @@ def combine_heads(x):
 def combine_last_two_dimensions(x):
     """Reshape x so that the last two dimension become one.
 
-    From https://github.com/tensorflow/tensor2tensor/blob/5623deb79cfcd28f8f8c5463b58b5bd76a81fd0d/tensor2tensor/layers/common_attention.py#L1165
+    From https://github.com/tensorflow/tensor2tensor/blob/5623deb79cfcd28f8f8c5463b58b5bd76a81fd0d/
+    tensor2tensor/layers/common_attention.py#L1165
     Args:
       x: a Tensor with shape [..., a, b]
 
@@ -84,7 +89,8 @@ def combine_last_two_dimensions(x):
 
 
 def get_divisors(n, res=None):
-    """From https://stackoverflow.com/questions/57154745/how-to-find-nearest-divisor-to-given-value-with-modulo-zero"""
+    """From https://stackoverflow.com/questions/57154745/how-to-find-nearest-divisor
+    -to-given-value-with-modulo-zero"""
     res = res or []
     i = 1
     while i <= n:
@@ -98,7 +104,8 @@ def shape_list(x):
     """
     Return list of dims, statically where possible.
 
-    From https://github.com/tensorflow/tensor2tensor/blob/2a33b152d7835af66a6d20afe7961751047e28dd/tensor2tensor/layers/common_layers.py#L2815
+    From https://github.com/tensorflow/tensor2tensor/blob/2a33b152d7835af66a6d20afe7961751047e28dd/
+    tensor2tensor/layers/common_layers.py#L2815
 
     """
     x = tf.convert_to_tensor(x)
@@ -121,7 +128,8 @@ def shape_list(x):
 def attention_image_summary(attn, image_shapes=None):
     """Compute color image summary.
 
-    From https://github.com/tensorflow/tensor2tensor/blob/5623deb79cfcd28f8f8c5463b58b5bd76a81fd0d/tensor2tensor/layers/common_attention.py#L1283
+    From https://github.com/tensorflow/tensor2tensor/blob/5623deb79cfcd28f8f8c5463b58b5bd76a81fd0d/
+    tensor2tensor/layers/common_attention.py#L1283
 
     Args:
       attn: a Tensor with shape [batch, num_heads, query_length, memory_length]
@@ -165,7 +173,8 @@ def attention_image_summary(attn, image_shapes=None):
 def top_kth_iterative(x, k):
     """Compute the k-th top element of x on the last axis iteratively.
 
-    From https://github.com/tensorflow/tensor2tensor/blob/2a33b152d7835af66a6d20afe7961751047e28dd/tensor2tensor/layers/common_layers.py#L3270
+    From https://github.com/tensorflow/tensor2tensor/blob/2a33b152d7835af66a6d20afe7961751047e28dd/
+    tensor2tensor/layers/common_layers.py#L3270
 
     This assumes values in x are non-negative, rescale if needed.
     It is often faster than tf.nn.top_k for small k, especially if k < 30.
@@ -206,6 +215,7 @@ def top_kth_iterative(x, k):
 def to_float(x):
     """
     Cast x to float; created because tf.to_float is deprecated.
-    From https://github.com/tensorflow/tensor2tensor/blob/2a33b152d7835af66a6d20afe7961751047e28dd/tensor2tensor/layers/common_layers.py#L97
+    From https://github.com/tensorflow/tensor2tensor/blob/2a33b152d7835af66a6d20afe7961751047e28dd/
+    tensor2tensor/layers/common_layers.py#L97
     """
     return tf.cast(x, tf.float32)
