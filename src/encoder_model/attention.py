@@ -17,7 +17,8 @@ class MultiHeadAttention(tf.keras.layers.Layer):
     https://www.tensorflow.org/text/tutorials/transformer
 
     Uses and combines components relative positional encoding components from from:
-    https://github.com/tensorflow/tensor2tensor/blob/5623deb79cfcd28f8f8c5463b58b5bd76a81fd0d/tensor2tensor/layers/common_attention.py
+    https://github.com/tensorflow/tensor2tensor/blob/5623deb79cfcd28f8f8c5463b58b5bd76a81fd0d/
+    tensor2tensor/layers/common_attention.py
 
     Module in a Transformer network that computes the attention weights
     for the input and produces an output vector with encoded information
@@ -30,9 +31,12 @@ class MultiHeadAttention(tf.keras.layers.Layer):
             d_model (int): Number of features in the input vector. Used when calculating MHA depth.
             num_heads (int): Number of attention heads to use.
             layer_num (int): Numeric identifier for each encoder layer in the encoder stack.
-            relative (bool): Boolean flag indicating whether or not to use relative or absolute positional encoding within the attention block.
-            rate (float): Dropout rate between 0 and 1 that is used in the dropout layer after calculating attention weights, and after the feed forward layer.
-            max_distance (int): Maximum distance in both forward and backward directions that relative positional encoding will utilise when clipping values.
+            relative (bool): Boolean flag indicating whether or not to use relative or absolute positional
+            encoding within the attention block.
+            rate (float): Dropout rate between 0 and 1 that is used in the dropout layer after calculating
+            attention weights, and after the feed forward layer.
+            max_distance (int): Maximum distance in both forward and backward directions that relative
+            positional encoding will utilise when clipping values.
             **kwargs:
         """
         super(MultiHeadAttention, self).__init__(**kwargs)
@@ -44,7 +48,8 @@ class MultiHeadAttention(tf.keras.layers.Layer):
         self.max_distance = max_distance
         self.mha_name = f"{self.name}_{self.layer_num}"
 
-        assert d_model % num_heads == 0  # necessary that the number of attention heads is a factor of number of features
+        # necessary that the number of attention heads is a factor of number of features
+        assert d_model % num_heads == 0
 
         self.depth = d_model // self.num_heads  # calculate depth
         self.dropout_rate = rate
@@ -66,7 +71,8 @@ class MultiHeadAttention(tf.keras.layers.Layer):
     def split_heads(self, x):
         """
           Split channels (dimension 2) into multiple heads (becomes dimension 1).
-          From https://github.com/tensorflow/tensor2tensor/blob/5623deb79cfcd28f8f8c5463b58b5bd76a81fd0d/tensor2tensor/layers/common_attention.py#L1198
+          From https://github.com/tensorflow/tensor2tensor/blob/5623deb79cfcd28f8f8c5463b58b5bd
+          76a81fd0d/tensor2tensor/layers/common_attention.py#L1198
 
         Args:
           x: a Tensor with shape [batch, length, channels]
@@ -114,8 +120,8 @@ class MultiHeadAttention(tf.keras.layers.Layer):
             # (batch_size, num_heads, seq_len_v, depth)
             # scaled_attention.shape == (batch_size, num_heads, seq_len_q, depth)
             # attention_weights.shape == (batch_size, num_heads, seq_len_q, seq_len_k)
-            scaled_attention, attention_weights = scaled_dot_product_attention(q, k, v, mask)  # TensorShape([32, 1, 80, 70]), TensorShape([32, 1, 80, 80])
-            scaled_attention = tf.transpose(scaled_attention, perm=[0, 2, 1, 3])  # TensorShape([32, 80, 1, 70])
+            scaled_attention, attention_weights = scaled_dot_product_attention(q, k, v, mask)
+            scaled_attention = tf.transpose(scaled_attention, perm=[0, 2, 1, 3])
             concat_attention = tf.reshape(
                 scaled_attention,
                 (batch_size, -1, self.d_model)
@@ -221,7 +227,8 @@ def dot_product_attention_relative(
 ):
     """Calculate relative position-aware dot-product self-attention.
 
-    From https://github.com/tensorflow/tensor2tensor/blob/5623deb79cfcd28f8f8c5463b58b5bd76a81fd0d/tensor2tensor/layers/common_attention.py#L1739
+    From https://github.com/tensorflow/tensor2tensor/blob/5623deb79cfcd28f8f8c5463b58b5bd76a81fd0d/
+    tensor2tensor/layers/common_attention.py#L1739
 
     The attention calculation is augmented with learned representations for the
     relative position between each element in q and each element in k and v.
@@ -303,7 +310,8 @@ def dot_product_attention_relative(
 def _generate_relative_positions_matrix(length_q, length_k, max_relative_position, cache=False):
     """
     Generates matrix of relative positions between inputs.
-    From https://github.com/tensorflow/tensor2tensor/blob/5623deb79cfcd28f8f8c5463b58b5bd76a81fd0d/tensor2tensor/layers/common_attention.py#L1670
+    From https://github.com/tensorflow/tensor2tensor/blob/5623deb79cfcd28f8f8c5463b58b5bd76a81fd0d/
+    tensor2tensor/layers/common_attention.py#L1670
     """
     if not cache:
 
@@ -322,15 +330,18 @@ def _generate_relative_positions_matrix(length_q, length_k, max_relative_positio
     return final_mat
 
 
-def _generate_relative_positions_embeddings(length_q, length_k, depth, max_relative_position, name, cache=False):
+def _generate_relative_positions_embeddings(length_q, length_k,
+                                            depth, max_relative_position, name, cache=False):
     """
     Generates tensor of size [1 if cache else length_q, length_k, depth].
-    From https://github.com/tensorflow/tensor2tensor/blob/5623deb79cfcd28f8f8c5463b58b5bd76a81fd0d/tensor2tensor/layers/common_attention.py#L1691
+    From https://github.com/tensorflow/tensor2tensor/blob/5623deb79cfcd28f8f8c5463b58b5bd76a81fd0d/
+    tensor2tensor/layers/common_attention.py#L1691
     """
 
     # Generates embedding for each relative position of dimension depth.
-    with tf.compat.v1.variable_scope(f"{name}_embeddings", reuse=tf.compat.v1.AUTO_REUSE):  # modified from source
-        relative_positions_matrix = _generate_relative_positions_matrix(length_q, length_k, max_relative_position, cache=cache)
+    with tf.compat.v1.variable_scope(f"{name}_embeddings", reuse=tf.compat.v1.AUTO_REUSE):  # modified
+        relative_positions_matrix = _generate_relative_positions_matrix(
+            length_q, length_k, max_relative_position, cache=cache)
         vocab_size = max_relative_position * 2 + 1
         embeddings_table = tf.compat.v1.get_variable(f"{name}_embeddings", [vocab_size, depth])
         embeddings = tf.gather(embeddings_table, relative_positions_matrix)
@@ -340,7 +351,8 @@ def _generate_relative_positions_embeddings(length_q, length_k, depth, max_relat
 def _relative_attention_inner(x, y, z, transpose):
     """Relative position-aware dot-product attention inner calculation.
 
-    From https://github.com/tensorflow/tensor2tensor/blob/5623deb79cfcd28f8f8c5463b58b5bd76a81fd0d/tensor2tensor/layers/common_attention.py#L1705
+    From https://github.com/tensorflow/tensor2tensor/blob/5623deb79cfcd28f8f8c5463b58b5bd76a81fd0d/
+    tensor2tensor/layers/common_attention.py#L1705
 
     This batches matrix multiply calculations to avoid unnecessary broadcasting.
 
@@ -375,7 +387,8 @@ def _relative_attention_inner(x, y, z, transpose):
 
 def harden_attention_weights(weights, k, gumbel_noise_weight):
     """
-    From https://github.com/tensorflow/tensor2tensor/blob/5623deb79cfcd28f8f8c5463b58b5bd76a81fd0d/tensor2tensor/layers/common_attention.py#L1582
+    From https://github.com/tensorflow/tensor2tensor/blob/5623deb79cfcd28f8f8c5463b58b5bd76a81fd0d/
+    tensor2tensor/layers/common_attention.py#L1582
     Make attention weights non-0 only on the top k ones.
     """
     if gumbel_noise_weight > 0.0:

@@ -16,12 +16,12 @@ from tensorflow.python.keras.optimizer_v2.adam import Adam
 
 import src.grid_search_config as hp_config
 import src.shared_config as shared_config
-from src.micchi_et_al.utils.analyse_results import generate_results, analyse_results
 from src.encoder_model.encoder_model import create_rn_model
+from src.encoder_model.utils import f1_score, create_hyperparams, register_metrics, print_cli_args, \
+    write_hparams_csv, print_batch_attributes, get_lr_scheduler, get_batch_attributes, get_callbacks
 from src.micchi_et_al.data_manipulation.load_data import load_tfrecords_dataset
+from src.micchi_et_al.utils.analyse_results import generate_results, analyse_results
 from src.micchi_et_al.utils.utils import setup_tfrecords_paths, setup_model_paths
-from src.encoder_model.utils import f1_score, create_hyperparams, register_metrics, print_cli_args, write_hparams_csv, \
-    print_batch_attributes, get_lr_scheduler, get_batch_attributes, get_callbacks
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -73,7 +73,8 @@ def train_encoder_model(h_params, train_path, valid_path, input_type, model_path
         h_params (dict): Dictionary of hyperparameters passed via the command line.
         train_path (str): Filepath containing training TFRecords.
         valid_path (str): Filepath containing validation TFRecords.
-        input_type (str): Type of input encoding used for model training. This project uses 'spelling_complete_cut'.
+        input_type (str): Type of input encoding used for model training.
+            This project uses 'spelling_complete_cut'.
         model_path (str): Filepath indicating where .h5 model file will be saved.
         model_folder (str): Directory location where TensorBoard runtime events and model will be saved.
         model_name (str): Name of the model to be saved.
@@ -236,7 +237,8 @@ if __name__ == "__main__":
         dest="model_idx",
         action="store",
         type=int,
-        help=f'index to select the model, between 0 and {len(shared_config.MODELS)}, {[f"{n}: {m}" for n, m in enumerate(shared_config.MODELS)]}',
+        help=f'index to select the model, between 0 and {len(shared_config.MODELS)}, '
+             f'{[f"{n}: {m}" for n, m in enumerate(shared_config.MODELS)]}',
     )
     parser.add_argument(
         "--input",
@@ -244,7 +246,8 @@ if __name__ == "__main__":
         dest="input_idx",
         action="store",
         type=int,
-        help=f'index to select input type, between 0 and {len(shared_config.INPUT_TYPES)}, {[f"{n}: {m}" for n, m in enumerate(shared_config.INPUT_TYPES)]}',
+        help=f'index to select input type, between 0 and {len(shared_config.INPUT_TYPES)},'
+             f' {[f"{n}: {m}" for n, m in enumerate(shared_config.INPUT_TYPES)]}',
     )
     parser.add_argument(
         "-pt",

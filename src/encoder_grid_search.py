@@ -1,5 +1,7 @@
-"""Executable Python script to run grid search to find optimal hyperparameter configurations.
-Randomly iterates through the cartesian product of all hyperparameter arrays defined in src/grid_search_config.py.
+"""
+Executable Python script to run grid search to find optimal hyperparameter
+configurations. Randomly iterates through the cartesian product of all hyperparameter arrays defined in
+src/grid_search_config.py.
 """
 import random
 import subprocess
@@ -14,7 +16,8 @@ import src.grid_search_config as hp_config
 if __name__ == '__main__':
 
     num_combos = 1
-    for name, param in hp_config.HPARAMS_DICT.items():  # get number of unique combos to iterate through for progress bar
+    # get number of unique combos to iterate through for progress bar
+    for name, param in hp_config.HPARAMS_DICT.items():
         num_combos *= len(param.domain.values)
 
     possible_values_arr = [x.domain.values for x in hp_config.HPARAMS_DICT.values()]
@@ -27,7 +30,8 @@ if __name__ == '__main__':
             h_param_arr.append(dict(zip(hparam_keys, combo)))
             progress_bar.update(1)
 
-    with tf.summary.create_file_writer("logs/hparam_tuning").as_default():  # initialize grid search hparams to record in tensorboard
+    # initialize grid search hparams to record in tensorboard
+    with tf.summary.create_file_writer("logs/hparam_tuning").as_default():
         hp.hparams_config(
             hparams=[
                 hp_config.HP_D_MODEL,
@@ -89,7 +93,8 @@ if __name__ == '__main__':
 
     for _ in tqdm(h_param_arr):
         combo = random.choice(h_param_arr)
-        if combo['max_pos_encoding'] < combo['chunk_size']:  # positional encoding needs to be big enough for data
+        # positional encoding needs to be big enough for data
+        if combo['max_pos_encoding'] < combo['chunk_size']:
             continue
 
         # execute training file for this specific hyperparameter combination
@@ -97,15 +102,22 @@ if __name__ == '__main__':
                f"-lr {combo['learning_rate']} " \
                f"-d {combo['dropout']} -dff1 {combo['dimension_ff_1']} -dff2 {combo['dimension_ff_2'] } " \
                f"-pt {combo['pool_type']} -mpe {combo['max_pos_encoding']} " \
-               f"-dm {combo['d_model']} -kc {combo['key_chain']} -wu {combo['warm_up_steps']} -md {combo['max_distance']} " \
-               f"-dmm {combo['d_model_mult']}  -ls {combo['lr_scheduler']} -r {combo['rel_pos_enc']} -cs {combo['chunk_size']} " \
-               f"-dg1-nel {combo['dg1_nel']} -dg2-nel {combo['dg2_nel']} -q-nel {combo['quality_nel']} -inv-nel {combo['inversion_nel']} " \
+               f"-dm {combo['d_model']} -kc {combo['key_chain']} -wu {combo['warm_up_steps']} " \
+               f"-md {combo['max_distance']} " \
+               f"-dmm {combo['d_model_mult']}  -ls {combo['lr_scheduler']} -r {combo['rel_pos_enc']} " \
+               f"-cs {combo['chunk_size']} " \
+               f"-dg1-nel {combo['dg1_nel']} -dg2-nel {combo['dg2_nel']} -q-nel {combo['quality_nel']} " \
+               f"-inv-nel {combo['inversion_nel']} " \
                f"-k-nel {combo['key_nel']} -r-nel {combo['root_nel']} " \
-               f"-dg1-nah {combo['dg1_nah']} -dg2-nah {combo['dg2_nah']} -q-nah {combo['quality_nah']} -inv-nah {combo['inversion_nah']} " \
+               f"-dg1-nah {combo['dg1_nah']} -dg2-nah {combo['dg2_nah']} -q-nah {combo['quality_nah']} " \
+               f"-inv-nah {combo['inversion_nah']} " \
                f"-k-nah {combo['key_nah']} -r-nah {combo['root_nah']} " \
-               f"-dg1-rel {combo['dg1_rel']} -dg2-rel {combo['dg2_rel']} -q-rel {combo['quality_rel']} -inv-rel {combo['inversion_rel']} " \
-               f"-k-rel {combo['key_rel']} -r-rel {combo['root_rel']} -qc {combo['quality_chain']} -lse {combo['label_smoothing_eps']} "\
-               f"-b1 {combo['beta_1']} -b2 {combo['beta_2']} -eps {combo['epsilon']} -kd {combo['key_dropout']} "\
+               f"-dg1-rel {combo['dg1_rel']} -dg2-rel {combo['dg2_rel']} -q-rel {combo['quality_rel']} " \
+               f"-inv-rel {combo['inversion_rel']} " \
+               f"-k-rel {combo['key_rel']} -r-rel {combo['root_rel']} -qc {combo['quality_chain']} " \
+               f"-lse {combo['label_smoothing_eps']} "\
+               f"-b1 {combo['beta_1']} -b2 {combo['beta_2']} -eps {combo['epsilon']} " \
+               f"-kd {combo['key_dropout']} "\
                f"--input 4"
 
         subprocess.call(f"../venv/Scripts/python encoder_train.py {args}")

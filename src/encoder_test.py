@@ -15,10 +15,27 @@ MODEL_NAME = 'encoder_spelling_bass_cut_44'
 
 if __name__ == '__main__':
     model_file_path = os.path.join(MODELS_FOLDER, MODEL_NAME)
-    ys_true, ys_pred, info = micchi_analysis.generate_results(DATA_FOLDER, model_file_path, MODEL_NAME, chunk_size=CHUNK_SIZE)
-    micchi_analysis.write_tabular_annotations(ys_pred, info["timesteps"], info["file_names"], os.path.join(model_file_path, 'analyses'))
-    idx = 139
-    acc = micchi_analysis.analyse_results(ys_true, ys_pred, confusion_matrices=CONFUSION_MATRICES)
-    model_with_accuracies = micchi_analysis.compare_results(DATA_FOLDER, MODELS_FOLDER, DATASET, export_annotations=True)
-    comparison_fp = os.path.join(MODELS_FOLDER, '../../..',
-                                 f'comparison_{datetime.now().strftime("%Y-%m-%d_%H-%M")}.csv')
+    ys_true, ys_pred, info = micchi_analysis.generate_results(
+        DATA_FOLDER,
+        model_file_path,
+        MODEL_NAME,
+        chunk_size=CHUNK_SIZE
+    )
+    micchi_analysis.write_tabular_annotations(
+        ys_pred,
+        info["timesteps"],
+        info["file_names"],
+        os.path.join(model_file_path, 'analyses')
+    )
+    acc = micchi_analysis.analyse_results(
+        ys_true,
+        ys_pred,
+        confusion_matrices=CONFUSION_MATRICES
+    )
+    model_with_accuracies = micchi_analysis.compare_results(
+        DATA_FOLDER,
+        MODELS_FOLDER,
+        DATASET,
+        export_annotations=True
+    )
+
