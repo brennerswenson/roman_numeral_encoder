@@ -75,9 +75,11 @@ for each task, where certain tasks are informed by the outputs of others. Arrows
 ## Using This Repo
 
 ### Environment and Dependencies
-This project was developed using Python 3.6.9 and TensorFlow 2.4.1 on a Windows operating system. To ensure full compatability with other 
+This project was developed using Python 3.6.9 and TensorFlow 2.4.1 on a Windows operating system.
 
-To set up your environment, ensure you are in the working directory, and run:
+To set up your environment prior to executing any of this project's code, ensure you are in the working 
+directory, 
+and run:
 - `python -m venv venv` - This sets up a virtual environment
 - `source venv/Scripts/activate` - Activate the virtual environment
 - `pip install -r requirements.txt` - Install all of this project's exact dependencies
