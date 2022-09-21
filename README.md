@@ -7,6 +7,8 @@ This branch contains code used in the development of Brenner Swenson's Master's 
 titled: _Automatic Harmonic Analysis: Roman Numerals via Deep Learning_. This project sought to implement self-attention based
 models in the context of Roman numeral classification.
 
+The submitted paper can be found at the root level of this directory in a .pdf titled "*Brenner_Swenson_MSc_Submission*".
+
 Note:
 It was forked in May of 2021 and does not reflect updates made to the parent repository after said date.
 
